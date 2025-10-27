@@ -1,22 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shelvd Frontend
 
-## Getting Started
+Este es el frontend de Shelvd, una aplicación de gestión de libros construida con [Next.js](https://nextjs.org) y TypeScript.
 
-First, run the development server:
+## Características
+
+- Sistema de autenticación completo (Login/Register/Logout)
+- Gestión de estado de usuario con React Context
+- Integración con backend NestJS
+- Autenticación basada en cookies HttpOnly
+- UI moderna con Tailwind CSS
+- Soporte para tema claro/oscuro
+
+## Requisitos previos
+
+- Node.js 18+ instalado
+- Backend NestJS corriendo en el puerto 4000
+
+## Configuración
+
+1. Instalar dependencias:
+
+```bash
+npm install
+```
+
+2. Configurar variables de entorno:
+
+Copia el archivo `.env.example` a `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+El archivo `.env.local` debe contener:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+## Ejecutar en desarrollo
 
 ```bash
 npm run dev
-# or
+# o
 yarn dev
-# or
+# o
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estructura del proyecto
+
+```
+app/
+├── login/          # Página de inicio de sesión
+├── register/       # Página de registro
+├── layout.tsx      # Layout principal con AuthProvider
+└── page.tsx        # Página de inicio
+
+context/
+└── AuthContext.tsx # Contexto de autenticación
+
+lib/
+└── api.ts          # Cliente de API y funciones de autenticación
+
+components/
+└── ProtectedRoute.tsx # Componente para proteger rutas
+```
+
+## Autenticación
+
+### Endpoints utilizados
+
+- `POST /auth/register` - Registro de usuario
+- `POST /auth/login` - Inicio de sesión
+- `POST /auth/logout` - Cerrar sesión
+- `GET /auth/me` - Obtener usuario actual
+- `PATCH /auth/profile` - Actualizar perfil
+
+### Uso del contexto de autenticación
+
+```typescript
+import { useAuth } from '@/context/AuthContext';
+
+function MyComponent() {
+  const { user, loading, login, register, logout } = useAuth();
+
+  // user contiene la información del usuario autenticado
+  // loading indica si está cargando
+  // login, register, logout son funciones para gestionar la autenticación
+}
+```
+
+### Proteger rutas
+
+Para proteger una página, envuélvela con el componente `ProtectedRoute`:
+
+```typescript
+import ProtectedRoute from '@/components/ProtectedRoute';
+
+export default function MyProtectedPage() {
+  return (
+    <ProtectedRoute>
+      {/* Tu contenido protegido aquí */}
+    </ProtectedRoute>
+  );
+}
+```
+
+## Páginas disponibles
+
+- `/` - Página de inicio (pública)
+- `/login` - Página de inicio de sesión
+- `/register` - Página de registro
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
