@@ -1,20 +1,37 @@
 "use client";
 
 import BookCard from "@/components/BookCard";
+import CreateCollectionDialog from "@/components/CreateCollectionDialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { useCollections } from "@/context/CollectionsContext";
-import { Book, booksApi, collectionsApi } from "@/lib/api";
+import { Book, booksApi, Collection, collectionsApi } from "@/lib/api";
+import {
+  AlertCircle,
+  ArrowRight,
+  BookOpen,
+  Folder,
+  FolderPlus,
+  Library,
+  Search,
+  Sparkles,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Upload, X, AlertCircle, BookOpen, FolderPlus, Folder, Library, Trash2, Sparkles, Cloud, Zap, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import CreateCollectionDialog from "@/components/CreateCollectionDialog";
-import { Collection } from "@/lib/api";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -37,7 +54,9 @@ export default function Home() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionsLoading, setCollectionsLoading] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [deletingCollectionId, setDeletingCollectionId] = useState<number | null>(null);
+  const [deletingCollectionId, setDeletingCollectionId] = useState<
+    number | null
+  >(null);
 
   // 🔄 Cargar libros desde el backend
   const loadBooks = async () => {
@@ -48,12 +67,19 @@ export default function Home() {
     try {
       if (selectedCollectionId) {
         // Cargar libros de una colección específica
-        const response = await collectionsApi.getBooks(selectedCollectionId, { page, limit });
+        const response = await collectionsApi.getBooks(selectedCollectionId, {
+          page,
+          limit,
+        });
         setBooks(response.data.books);
         setTotalPages(response.pagination.totalPages);
       } else {
         // Cargar todos los libros con filtros
-        const response = await booksApi.getAll({ title: searchTitle, page, limit });
+        const response = await booksApi.getAll({
+          title: searchTitle,
+          page,
+          limit,
+        });
         setBooks(response.data);
         setTotalPages(response.totalPages);
       }
@@ -74,7 +100,7 @@ export default function Home() {
       const data = await collectionsApi.getAll();
       setCollections(data);
     } catch (error) {
-      console.error('Error al cargar colecciones:', error);
+      console.error("Error al cargar colecciones:", error);
     } finally {
       setCollectionsLoading(false);
     }
@@ -83,7 +109,7 @@ export default function Home() {
   // 🗑️ Eliminar colección
   const handleDeleteCollection = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('¿Estás seguro de eliminar esta colección?')) return;
+    if (!confirm("¿Estás seguro de eliminar esta colección?")) return;
 
     setDeletingCollectionId(id);
     try {
@@ -93,7 +119,7 @@ export default function Home() {
         setSelectedCollectionId(null);
       }
     } catch (error) {
-      console.error('Error al eliminar colección:', error);
+      console.error("Error al eliminar colección:", error);
       setError("Error al eliminar la colección");
     } finally {
       setDeletingCollectionId(null);
@@ -216,7 +242,9 @@ export default function Home() {
                   {/* Botones de acción */}
                   <div className="flex gap-2 w-full sm:w-auto">
                     <Button
-                      onClick={() => document.getElementById("file-upload")?.click()}
+                      onClick={() =>
+                        document.getElementById("file-upload")?.click()
+                      }
                       disabled={uploadingFile}
                       size="lg"
                       className="flex-1 sm:flex-none group"
@@ -294,8 +322,8 @@ export default function Home() {
                     onClick={() => setSelectedCollectionId(null)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 ${
                       selectedCollectionId === null
-                        ? 'text-foreground border-primary bg-accent/50'
-                        : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/30'
+                        ? "text-foreground border-primary bg-accent/50"
+                        : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/30"
                     }`}
                   >
                     <Library className="w-4 h-4" />
@@ -313,8 +341,8 @@ export default function Home() {
                         key={collection.id}
                         className={`group flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 ${
                           selectedCollectionId === collection.id
-                            ? 'text-foreground border-primary bg-accent/50'
-                            : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/30'
+                            ? "text-foreground border-primary bg-accent/50"
+                            : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/30"
                         }`}
                       >
                         <div
@@ -333,7 +361,9 @@ export default function Home() {
                           )}
                         </div>
                         <button
-                          onClick={(e) => handleDeleteCollection(collection.id, e)}
+                          onClick={(e) =>
+                            handleDeleteCollection(collection.id, e)
+                          }
                           disabled={deletingCollectionId === collection.id}
                           className="ml-1 opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity p-1 rounded hover:bg-destructive/10"
                           aria-label="Eliminar colección"
@@ -349,23 +379,22 @@ export default function Home() {
 
             {/* Card contenedor de libros */}
             <Card className="border border-border/50 shadow-xl bg-card/80 backdrop-blur-xl">
-
-                {/* Mensaje de error */}
-                {error && (
-                  <CardContent className="pt-4 sm:pt-6 px-4 sm:px-8">
-                    <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                          Error
-                        </p>
-                        <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                          {error}
-                        </p>
-                      </div>
+              {/* Mensaje de error */}
+              {error && (
+                <CardContent className="pt-4 sm:pt-6 px-4 sm:px-8">
+                  <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                        Error
+                      </p>
+                      <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+                        {error}
+                      </p>
                     </div>
-                  </CardContent>
-                )}
+                  </div>
+                </CardContent>
+              )}
 
               {/* Grid de libros */}
               {booksLoading ? (
@@ -386,12 +415,13 @@ export default function Home() {
                     <p className="text-sm text-muted-foreground mb-6 max-w-sm">
                       {searchTitle
                         ? `No se encontraron libros que coincidan con "${searchTitle}"`
-                        : "Comienza agregando tu primer libro usando el botón de arriba"
-                      }
+                        : "Comienza agregando tu primer libro usando el botón de arriba"}
                     </p>
                     {!searchTitle && (
                       <Button
-                        onClick={() => document.getElementById("file-upload")?.click()}
+                        onClick={() =>
+                          document.getElementById("file-upload")?.click()
+                        }
                         size="lg"
                         className="group"
                       >
@@ -422,7 +452,10 @@ export default function Home() {
               <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
                 {/* Total de libros */}
                 <div className="text-sm text-muted-foreground text-center sm:text-left flex items-center gap-2">
-                  <Badge variant="secondary" className="text-sm px-3 py-1 font-semibold">
+                  <Badge
+                    variant="secondary"
+                    className="text-sm px-3 py-1 font-semibold"
+                  >
                     {books.length} {books.length === 1 ? "libro" : "libros"}
                   </Badge>
                   <span className="hidden sm:inline">en esta página</span>
@@ -448,9 +481,13 @@ export default function Home() {
                   >
                     &larr;
                   </Button>
-                  <Badge variant="secondary" className="px-4 py-1.5 font-medium">
+                  <Badge
+                    variant="secondary"
+                    className="px-4 py-1.5 font-medium"
+                  >
                     <span className="hidden sm:inline">Página </span>
-                    {page} <span className="hidden sm:inline">de {totalPages}</span>
+                    {page}{" "}
+                    <span className="hidden sm:inline">de {totalPages}</span>
                     <span className="sm:hidden">/{totalPages}</span>
                   </Badge>
                   <Button
@@ -495,16 +532,23 @@ export default function Home() {
 
           {/* Navbar Colorido */}
           <nav className="relative border-b border-white/10 bg-white/5 backdrop-blur-xl sticky top-0 z-50">
-            <div className="container mx-auto px-6 lg:px-8">
-              <div className="flex h-20 items-center justify-between">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex h-16 sm:h-20 items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/50">
                     <Library className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-2xl font-bold text-foreground">Shelvd</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    Shelvd
+                  </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button asChild variant="ghost" size="lg" className="hover:bg-white/10">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="lg"
+                    className="hover:bg-white/10"
+                  >
                     <Link href="/login">Acceder</Link>
                   </Button>
                 </div>
@@ -513,16 +557,18 @@ export default function Home() {
           </nav>
 
           {/* Hero Section - Colorido */}
-          <section className="relative pt-32 pb-20 px-6">
+          <section className="relative pt-16 sm:pt-24 lg:pt-32 pb-12 sm:pb-16 lg:pb-20 px-4 sm:px-6">
             <div className="container relative mx-auto max-w-6xl">
-              <div className="text-center space-y-8">
+              <div className="text-center space-y-6 sm:space-y-8">
                 {/* Badge colorido */}
                 <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
                   <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-                  <span className="text-sm font-semibold text-foreground">Tu biblioteca digital personal</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    Tu biblioteca digital personal
+                  </span>
                 </div>
 
-                <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight">
+                <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-tight">
                   Tu biblioteca
                   <br />
                   <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
@@ -530,21 +576,29 @@ export default function Home() {
                   </span>
                 </h1>
 
-                <p className="text-xl sm:text-2xl text-foreground/80 max-w-3xl mx-auto font-medium">
-                  Lee, organiza y gestiona tu colección digital desde cualquier dispositivo
+                <p className="text-lg sm:text-xl lg:text-2xl text-foreground/80 max-w-3xl mx-auto font-medium px-4">
+                  Lee, organiza y gestiona tu colección digital desde cualquier
+                  dispositivo
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-                  <Button asChild size="lg" className="h-14 px-10 text-lg bg-primary hover:bg-primary/90 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 lg:pt-8 w-full max-w-md sm:max-w-none px-4">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg bg-primary hover:bg-primary/90 shadow-xl w-full sm:w-auto"
+                  >
                     <Link href="/register">
                       Comenzar ahora
-                      <ArrowRight className="w-5 h-5 ml-2" />
+                      <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 ml-2" />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className="h-14 px-10 text-lg border-2 hover:bg-accent">
-                    <Link href="/login">
-                      Iniciar sesión
-                    </Link>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg border-2 hover:bg-accent w-full sm:w-auto"
+                  >
+                    <Link href="/login">Iniciar sesión</Link>
                   </Button>
                 </div>
               </div>
@@ -552,107 +606,129 @@ export default function Home() {
           </section>
 
           {/* Stats Section - Coloridos */}
-          <section className="relative py-16 px-6">
+          <section className="relative py-10 sm:py-12 lg:py-16 px-4 sm:px-6">
             <div className="container mx-auto max-w-5xl">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 backdrop-blur-sm">
-                  <div className="text-5xl font-black bg-gradient-to-br from-blue-500 to-cyan-400 bg-clip-text text-transparent mb-3">∞</div>
-                  <div className="text-sm font-semibold text-foreground">Libros ilimitados</div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 backdrop-blur-sm">
+                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-blue-500 to-cyan-400 bg-clip-text text-transparent mb-2 sm:mb-3">
+                    10
+                  </div>
+                  <div className="text-xs sm:text-sm font-semibold text-foreground">
+                    Hasta 10 libros (próximamente más)
+                  </div>
                 </div>
-                <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-sm">
-                  <div className="text-5xl font-black bg-gradient-to-br from-purple-500 to-pink-400 bg-clip-text text-transparent mb-3">3</div>
-                  <div className="text-sm font-semibold text-foreground">Formatos soportados</div>
+                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-sm">
+                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-purple-500 to-pink-400 bg-clip-text text-transparent mb-2 sm:mb-3">
+                    3
+                  </div>
+                  <div className="text-xs sm:text-sm font-semibold text-foreground">
+                    Formatos soportados
+                  </div>
                 </div>
-                <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-pink-500/10 to-orange-500/10 border border-pink-500/20 backdrop-blur-sm">
-                  <div className="text-5xl font-black bg-gradient-to-br from-pink-500 to-orange-400 bg-clip-text text-transparent mb-3">100%</div>
-                  <div className="text-sm font-semibold text-foreground">En la nube</div>
+                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500/10 to-orange-500/10 border border-pink-500/20 backdrop-blur-sm">
+                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-pink-500 to-orange-400 bg-clip-text text-transparent mb-2 sm:mb-3">
+                    100%
+                  </div>
+                  <div className="text-xs sm:text-sm font-semibold text-foreground">
+                    En la nube
+                  </div>
                 </div>
-                <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 backdrop-blur-sm">
-                  <div className="text-5xl font-black bg-gradient-to-br from-indigo-500 to-blue-400 bg-clip-text text-transparent mb-3">24/7</div>
-                  <div className="text-sm font-semibold text-foreground">Acceso total</div>
+                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 backdrop-blur-sm">
+                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-indigo-500 to-blue-400 bg-clip-text text-transparent mb-2 sm:mb-3">
+                    24/7
+                  </div>
+                  <div className="text-xs sm:text-sm font-semibold text-foreground">
+                    Acceso total
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
           {/* Features - Super Coloridos */}
-          <section className="relative py-20 px-6">
-            <div className="container mx-auto max-w-6xl space-y-32">
+          <section className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6">
+            <div className="container mx-auto max-w-6xl space-y-16 sm:space-y-24 lg:space-y-32">
               {/* Feature 1 */}
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                <div className="space-y-6">
-                  <div className="inline-block p-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-xl shadow-blue-500/50">
-                    <Library className="w-10 h-10 text-white" />
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl sm:rounded-2xl shadow-xl shadow-blue-500/50">
+                    <Library className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
                   </div>
-                  <h2 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent pb-2">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent pb-2">
                     Organiza tu colección
                   </h2>
-                  <p className="text-lg text-foreground/70 leading-relaxed font-medium">
-                    Crea colecciones personalizadas, etiqueta tus libros y mantén todo perfectamente organizado. Tu biblioteca, a tu manera.
+                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
+                    Crea colecciones personalizadas, etiqueta tus libros y
+                    mantén todo perfectamente organizado. Tu biblioteca, a tu
+                    manera.
                   </p>
                 </div>
-                <div className="relative h-80 bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-400 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/50 overflow-hidden">
+                <div className="relative h-64 sm:h-72 lg:h-80 bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-400 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/50 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  <Folder className="relative w-32 h-32 text-white/90 drop-shadow-lg" />
+                  <Folder className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 text-white/90 drop-shadow-lg" />
                 </div>
               </div>
 
               {/* Feature 2 */}
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                <div className="relative h-80 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-400 rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/50 overflow-hidden lg:order-first">
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
+                <div className="relative h-64 sm:h-72 lg:h-80 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-400 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/50 overflow-hidden lg:order-first">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  <BookOpen className="relative w-32 h-32 text-white/90 drop-shadow-lg" />
+                  <BookOpen className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 text-white/90 drop-shadow-lg" />
                 </div>
-                <div className="space-y-6">
-                  <div className="inline-block p-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-xl shadow-purple-500/50">
-                    <BookOpen className="w-10 h-10 text-white" />
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl sm:rounded-2xl shadow-xl shadow-purple-500/50">
+                    <BookOpen className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
                   </div>
-                  <h2 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent pb-2">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent pb-2">
                     Lee donde quieras
                   </h2>
-                  <p className="text-lg text-foreground/70 leading-relaxed font-medium">
-                    Lector integrado y optimizado para EPUB, PDF y MOBI. Tus libros sincronizados en todos tus dispositivos.
+                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
+                    Lector integrado y optimizado para EPUB, PDF y MOBI. Tus
+                    libros sincronizados en todos tus dispositivos.
                   </p>
                 </div>
               </div>
 
               {/* Feature 3 */}
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                <div className="space-y-6">
-                  <div className="inline-block p-4 bg-gradient-to-br from-pink-500 to-orange-500 rounded-2xl shadow-xl shadow-pink-500/50">
-                    <Search className="w-10 h-10 text-white" />
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-pink-500 to-orange-500 rounded-xl sm:rounded-2xl shadow-xl shadow-pink-500/50">
+                    <Search className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
                   </div>
-                  <h2 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent pb-2">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent pb-2">
                     Encuentra al instante
                   </h2>
-                  <p className="text-lg text-foreground/70 leading-relaxed font-medium">
-                    Búsqueda rápida y potente. Encuentra cualquier libro por título, autor o etiqueta en segundos.
+                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
+                    Búsqueda rápida y potente. Encuentra cualquier libro por
+                    título, autor o etiqueta en segundos.
                   </p>
                 </div>
-                <div className="relative h-80 bg-gradient-to-br from-pink-500 via-orange-500 to-amber-400 rounded-3xl flex items-center justify-center shadow-2xl shadow-pink-500/50 overflow-hidden">
+                <div className="relative h-64 sm:h-72 lg:h-80 bg-gradient-to-br from-pink-500 via-orange-500 to-amber-400 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl shadow-pink-500/50 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  <Search className="relative w-32 h-32 text-white/90 drop-shadow-lg" />
+                  <Search className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 text-white/90 drop-shadow-lg" />
                 </div>
               </div>
             </div>
           </section>
 
           {/* CTA Final - Colorido */}
-          <section className="relative py-32 px-6">
+          <section className="relative py-16 sm:py-20 lg:py-32 px-4 sm:px-6">
             <div className="container mx-auto max-w-4xl">
-              <div className="relative rounded-3xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-12 sm:p-16 text-center shadow-2xl shadow-purple-500/50 overflow-hidden">
+              <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 sm:p-12 lg:p-16 text-center shadow-2xl shadow-purple-500/50 overflow-hidden">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-                <div className="relative space-y-6">
-                  <h2 className="text-5xl sm:text-6xl font-black text-white">
+                <div className="relative space-y-4 sm:space-y-6">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">
                     Empieza hoy mismo
                   </h2>
-                  <p className="text-xl text-white/90 font-medium">
+                  <p className="text-base sm:text-lg lg:text-xl text-white/90 font-medium">
                     Únete y organiza tu biblioteca digital en minutos
                   </p>
-                  <Button asChild size="lg" className="h-16 px-12 text-lg bg-white text-purple-600 hover:bg-white/90 shadow-xl font-bold">
-                    <Link href="/register">
-                      Crear cuenta gratis
-                    </Link>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="h-12 sm:h-14 lg:h-16 px-8 sm:px-10 lg:px-12 text-base sm:text-lg bg-white text-purple-600 hover:bg-white/90 shadow-xl font-bold"
+                  >
+                    <Link href="/register">Crear cuenta gratis</Link>
                   </Button>
                 </div>
               </div>
@@ -660,30 +736,38 @@ export default function Home() {
           </section>
 
           {/* Footer Colorido */}
-          <footer className="relative border-t border-white/10 bg-white/5 backdrop-blur-xl py-12 px-6">
+          <footer className="relative border-t border-white/10 bg-white/5 backdrop-blur-xl py-8 sm:py-10 lg:py-12 px-4 sm:px-6">
             <div className="container mx-auto max-w-6xl">
-              <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col items-center gap-4 sm:gap-5 lg:gap-6">
                 {/* Logo y nombre */}
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                     <Library className="w-4 h-4 text-white" />
                   </div>
-                  <span className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Shelvd</span>
+                  <span className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Shelvd
+                  </span>
                 </div>
 
                 {/* Enlaces legales */}
-                <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-                  <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
+                <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <Link
+                    href="/terms"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     Términos y Condiciones
                   </Link>
                   <span className="text-muted-foreground/50">•</span>
-                  <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Link
+                    href="/privacy"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     Política de Privacidad
                   </Link>
                 </div>
 
                 {/* Copyright */}
-                <p className="text-sm text-muted-foreground text-center">
+                <p className="text-xs sm:text-sm text-muted-foreground text-center px-4">
                   © 2025 Shelvd - Tu biblioteca digital personal y privada
                 </p>
               </div>
