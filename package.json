@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node -e \"const fs = require('fs'); const path = require('path'); const srcDir = path.join('node_modules', 'pdfjs-dist', 'build'); const destDir = path.join('public', 'pdf-worker'); if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true }); const workerFile = fs.existsSync(path.join(srcDir, 'pdf.worker.min.mjs')) ? 'pdf.worker.min.mjs' : 'pdf.worker.mjs'; fs.copyFileSync(path.join(srcDir, workerFile), path.join(destDir, 'pdf.worker.min.mjs'));\""
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -23,8 +24,10 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.548.0",
     "next": "16.0.0",
+    "pdfjs-dist": "^5.4.296",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-pdf": "^10.2.0",
     "react-reader": "^2.0.15",
     "tailwind-merge": "^3.3.1"
   },

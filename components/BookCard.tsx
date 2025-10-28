@@ -65,6 +65,39 @@ export default function BookCard({ book, onDelete, onCollectionChange }: BookCar
     router.push(`/reader/${book.id}`);
   };
 
+  const handleDownload = async () => {
+    if (!book.bookUrl) {
+      alert('URL del libro no disponible');
+      return;
+    }
+
+    try {
+      // Descargar el libro
+      const response = await fetch(book.bookUrl);
+
+      if (!response.ok) {
+        throw new Error(`Error al descargar: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+
+      // Crear un enlace temporal para descargar
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${book.title}.epub`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Limpiar
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error al descargar el libro:', error);
+      alert('Error al descargar el libro');
+    }
+  };
+
   return (
     <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
       {/* Contenedor clickeable */}
@@ -140,6 +173,15 @@ export default function BookCard({ book, onDelete, onCollectionChange }: BookCar
                     }}
                   >
                     Agregar a colección
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload();
+                    }}
+                  >
+                    Descargar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

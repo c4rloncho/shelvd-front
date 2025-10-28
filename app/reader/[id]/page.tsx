@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import PDFViewer from "@/components/PDFViewer";
 
 interface TocItem {
   label: string;
@@ -55,6 +56,8 @@ export default function ReaderPage() {
   const [lastSavedPage, setLastSavedPage] = useState<number>(0);
   const [tableOfContents, setTableOfContents] = useState<TocItem[]>([]);
   const [isTocOpen, setIsTocOpen] = useState(false);
+  const [fileType, setFileType] = useState<"epub" | "pdf" | null>(null);
+  const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
 
   // Configuración de lectura
   const [fontSize, setFontSize] = useState(100);
@@ -168,6 +171,15 @@ export default function ReaderPage() {
     }
   };
 
+  // Función para detectar el tipo de archivo
+  const detectFileType = (url: string): "epub" | "pdf" => {
+    const lowercaseUrl = url.toLowerCase();
+    if (lowercaseUrl.includes(".pdf")) {
+      return "pdf";
+    }
+    return "epub";
+  };
+
   // Función para aplicar estilos del tema
   const applyReaderStyles = () => {
     if (!renditionRef.current) return;
@@ -220,6 +232,10 @@ export default function ReaderPage() {
           throw new Error("URL del libro no disponible");
         }
 
+        // Detectar tipo de archivo
+        const detectedFileType = detectFileType(bookData.bookUrl);
+        setFileType(detectedFileType);
+
         // Intentar obtener el libro del caché primero
         let arrayBuffer = await getCachedBook(bookId, bookData.bookUrl);
 
@@ -241,6 +257,26 @@ export default function ReaderPage() {
             console.error("Error al guardar en caché:", cacheError);
             // No lanzar error, continuar sin caché
           }
+        }
+
+        // Si es PDF, simplemente guardar el arrayBuffer y terminar
+        if (detectedFileType === "pdf") {
+          setPdfData(arrayBuffer);
+
+          // Cargar progreso desde la base de datos para PDFs
+          try {
+            const savedProgress = await progressApi.getProgress(bookId);
+            if (savedProgress && savedProgress.currentPage > 0) {
+              setCurrentPage(savedProgress.currentPage);
+              setLastSavedPage(savedProgress.currentPage);
+            }
+          } catch (error) {
+            // Silenciosamente ignorar si no hay progreso guardado
+            // Solo mostrar error si es un problema real de conexión
+          }
+
+          setLoading(false);
+          return;
         }
 
         // Crear el libro EPUB desde el arrayBuffer
@@ -464,6 +500,20 @@ export default function ReaderPage() {
     renditionRef.current?.prev();
   };
 
+  // Handler para cambio de página en PDFs
+  const handlePDFPageChange = useRef(
+    debounce((page: number, total: number) => {
+      setCurrentPage(page);
+      setTotalPages(total);
+
+      // Guardar progreso solo si cambió
+      if (page !== lastSavedPage) {
+        saveProgress(bookId, page, total);
+        setLastSavedPage(page);
+      }
+    }, 1000)
+  ).current;
+
   const goToChapter = async (href: string) => {
     if (!renditionRef.current || !epubBookRef.current) return;
 
@@ -595,36 +645,39 @@ export default function ReaderPage() {
           {/* Controles de navegación */}
           {!loading && (
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Botón de capítulos */}
-              <Popover open={isTocOpen} onOpenChange={setIsTocOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <List className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-80 max-h-[500px] overflow-y-auto"
-                  align="end"
-                >
-                  <div className="space-y-2">
-                    <div className="sticky top-0 bg-popover pb-2 border-b border-border">
-                      <h4 className="font-semibold text-sm">Capítulos</h4>
-                    </div>
-                    {tableOfContents.length > 0 ? (
-                      <div className="space-y-1">
-                        {tableOfContents.map((item) => renderTocItem(item))}
+              {/* Botón de capítulos - Solo para EPUB */}
+              {fileType === "epub" && (
+                <Popover open={isTocOpen} onOpenChange={setIsTocOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-80 max-h-[500px] overflow-y-auto"
+                    align="end"
+                  >
+                    <div className="space-y-2">
+                      <div className="sticky top-0 bg-popover pb-2 border-b border-border">
+                        <h4 className="font-semibold text-sm">Capítulos</h4>
                       </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground py-4 text-center">
-                        No hay capítulos disponibles
-                      </p>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
+                      {tableOfContents.length > 0 ? (
+                        <div className="space-y-1">
+                          {tableOfContents.map((item) => renderTocItem(item))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground py-4 text-center">
+                          No hay capítulos disponibles
+                        </p>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
 
-              {/* Botón de configuración */}
-              <Popover>
+              {/* Botón de configuración - Solo para EPUB */}
+              {fileType === "epub" && (
+                <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Settings className="h-4 w-4" />
@@ -837,7 +890,9 @@ export default function ReaderPage() {
                   </div>
                 </PopoverContent>
               </Popover>
+              )}
 
+              {/* Controles de navegación y progreso */}
               {totalPages > 0 && (
                 <div className="flex flex-col items-end">
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -848,18 +903,22 @@ export default function ReaderPage() {
                   </span>
                 </div>
               )}
-              <Button variant="outline" size="sm" onClick={prevPage}>
-                ← Anterior
-              </Button>
-              <Button variant="outline" size="sm" onClick={nextPage}>
-                Siguiente →
-              </Button>
+              {fileType === "epub" && (
+                <>
+                  <Button variant="outline" size="sm" onClick={prevPage}>
+                    ← Anterior
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={nextPage}>
+                    Siguiente →
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
 
-        {/* 🎯 AQUÍ VA LA BARRA DE PROGRESO - DESPUÉS DEL DIV ANTERIOR */}
-        {!loading && totalPages > 0 && (
+        {/* Barra de progreso - Solo para EPUB */}
+        {!loading && totalPages > 0 && fileType === "epub" && (
           <div className="px-4 pb-3">
             <div className="flex items-center gap-3">
               <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
@@ -880,11 +939,19 @@ export default function ReaderPage() {
 
       {/* Contenedor del lector */}
       <div className="flex-1 relative overflow-hidden">
-        <div
-          ref={viewerRef}
-          className="absolute inset-0"
-          style={{ height: "100%", width: "100%" }}
-        />
+        {fileType === "pdf" && pdfData ? (
+          <PDFViewer
+            file={pdfData}
+            onPageChange={handlePDFPageChange}
+            initialPage={currentPage}
+          />
+        ) : (
+          <div
+            ref={viewerRef}
+            className="absolute inset-0"
+            style={{ height: "100%", width: "100%" }}
+          />
+        )}
       </div>
     </div>
   );
