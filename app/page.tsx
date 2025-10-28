@@ -533,20 +533,15 @@ export default function Home() {
           {/* Navbar Colorido */}
           <nav className="relative border-b border-white/10 bg-white/5 backdrop-blur-xl sticky top-0 z-50">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex h-16 sm:h-20 items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/50">
-                    <Library className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-2xl font-bold text-foreground">
-                    Shelvd
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
+              <div className="flex h-16 items-center justify-between">
+                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                  Shelvd
+                </span>
+                <div className="flex items-center gap-3 sm:gap-4">
                   <Button
                     asChild
                     variant="ghost"
-                    size="lg"
+                    size="default"
                     className="hover:bg-white/10"
                   >
                     <Link href="/login">Acceder</Link>
@@ -559,26 +554,29 @@ export default function Home() {
           {/* Hero Section - Colorido */}
           <section className="relative pt-16 sm:pt-24 lg:pt-32 pb-12 sm:pb-16 lg:pb-20 px-4 sm:px-6">
             <div className="container relative mx-auto max-w-6xl">
-              <div className="text-center space-y-6 sm:space-y-8">
-                {/* Badge colorido */}
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
-                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-                  <span className="text-sm font-semibold text-foreground">
-                    Tu biblioteca digital personal
-                  </span>
+              <div className="text-center space-y-8 sm:space-y-10">
+                {/* Nombre de la app - Protagonista */}
+                <div className="space-y-4 sm:space-y-6">
+                  <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tight">
+                    <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                      Shelvd
+                    </span>
+                  </h1>
+
+                  {/* Divider elegante */}
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="h-px w-12 sm:w-20 bg-gradient-to-r from-transparent via-foreground/20 to-transparent"></div>
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                    <div className="h-px w-12 sm:w-20 bg-gradient-to-r from-transparent via-foreground/20 to-transparent"></div>
+                  </div>
+
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground/90">
+                    Tu biblioteca siempre contigo
+                  </p>
                 </div>
 
-                <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-tight">
-                  Tu biblioteca
-                  <br />
-                  <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
-                    siempre contigo
-                  </span>
-                </h1>
-
-                <p className="text-lg sm:text-xl lg:text-2xl text-foreground/80 max-w-3xl mx-auto font-medium px-4">
-                  Lee, organiza y gestiona tu colección digital desde cualquier
-                  dispositivo
+                <p className="text-base sm:text-lg lg:text-xl text-foreground/70 max-w-2xl mx-auto px-4">
+                  Lee, organiza y gestiona tu colección digital desde cualquier dispositivo
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 lg:pt-8 w-full max-w-md sm:max-w-none px-4">
@@ -651,9 +649,6 @@ export default function Home() {
               {/* Feature 1 */}
               <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
                 <div className="space-y-4 sm:space-y-6">
-                  <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl sm:rounded-2xl shadow-xl shadow-blue-500/50">
-                    <Library className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
-                  </div>
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent pb-2">
                     Organiza tu colección
                   </h2>
@@ -676,9 +671,6 @@ export default function Home() {
                   <BookOpen className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 text-white/90 drop-shadow-lg" />
                 </div>
                 <div className="space-y-4 sm:space-y-6">
-                  <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl sm:rounded-2xl shadow-xl shadow-purple-500/50">
-                    <BookOpen className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
-                  </div>
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent pb-2">
                     Lee donde quieras
                   </h2>
@@ -692,9 +684,6 @@ export default function Home() {
               {/* Feature 3 */}
               <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
                 <div className="space-y-4 sm:space-y-6">
-                  <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-pink-500 to-orange-500 rounded-xl sm:rounded-2xl shadow-xl shadow-pink-500/50">
-                    <Search className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
-                  </div>
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent pb-2">
                     Encuentra al instante
                   </h2>
@@ -744,7 +733,7 @@ export default function Home() {
                   <div className="p-1.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                     <Library className="w-4 h-4 text-white" />
                   </div>
-                  <span className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                     Shelvd
                   </span>
                 </div>
