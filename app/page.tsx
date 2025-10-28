@@ -604,95 +604,67 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Stats Section - Coloridos */}
-          <section className="relative py-10 sm:py-12 lg:py-16 px-4 sm:px-6">
-            <div className="container mx-auto max-w-5xl">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 backdrop-blur-sm">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-blue-500 to-cyan-400 bg-clip-text text-transparent mb-2 sm:mb-3">
-                    10
-                  </div>
-                  <div className="text-xs sm:text-sm font-semibold text-foreground">
-                    Hasta 10 libros (próximamente más)
-                  </div>
+          {/* Features - Contenedor Cuadrado Ajustado */}
+          <section className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6">
+            <div className="container mx-auto max-w-6xl space-y-16 sm:space-y-24 lg:space-y-32">
+              {/* Feature 1 */}
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
+                <div className="space-y-4 sm:space-y-6">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent pb-2">
+                    Organiza tu colección
+                  </h2>
+                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
+                    Crea colecciones personalizadas, etiqueta tus libros y
+                    mantén todo perfectamente organizado. Tu biblioteca, a tu
+                    manera.
+                  </p>
                 </div>
-                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-sm">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-purple-500 to-pink-400 bg-clip-text text-transparent mb-2 sm:mb-3">
-                    3
-                  </div>
-                  <div className="text-xs sm:text-sm font-semibold text-foreground">
-                    Formatos soportados
-                  </div>
-                </div>
-                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500/10 to-orange-500/10 border border-pink-500/20 backdrop-blur-sm">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-pink-500 to-orange-400 bg-clip-text text-transparent mb-2 sm:mb-3">
-                    100%
-                  </div>
-                  <div className="text-xs sm:text-sm font-semibold text-foreground">
-                    En la nube
-                  </div>
-                </div>
-                <div className="text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 backdrop-blur-sm">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-br from-indigo-500 to-blue-400 bg-clip-text text-transparent mb-2 sm:mb-3">
-                    24/7
-                  </div>
-                  <div className="text-xs sm:text-sm font-semibold text-foreground">
-                    Acceso total
-                  </div>
+                <div className="relative w-full aspect-square max-w-md mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-blue-500/20 shadow-xl bg-gradient-to-br from-blue-500/5 to-cyan-500/5">
+                  <img
+                    src="/images/feature-organize.jpg"
+                    alt="Organiza tu colección de libros"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
-            </div>
-          </section>
 
-          {/* Features - Estilo Stats Cards */}
-          <section className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6">
-            <div className="container mx-auto max-w-5xl">
-              <div className="grid md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                {/* Feature 1 */}
-                <div className="group p-6 sm:p-8 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 backdrop-blur-sm hover:border-blue-500/40 transition-all duration-300">
-                  <div className="mb-4 sm:mb-6">
-                    <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
-                      <Folder className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-black bg-gradient-to-br from-blue-500 to-cyan-400 bg-clip-text text-transparent mb-3">
-                    Organiza tu colección
-                  </h3>
-                  <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
-                    Crea colecciones personalizadas y mantén todo perfectamente
-                    organizado
-                  </p>
+              {/* Feature 2 */}
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
+                <div className="relative w-full aspect-square max-w-md mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-purple-500/20 shadow-xl lg:order-first bg-gradient-to-br from-purple-500/5 to-pink-500/5">
+                  <img
+                    src="/images/feature-read.jpg"
+                    alt="Lee donde quieras"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-
-                {/* Feature 2 */}
-                <div className="group p-6 sm:p-8 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/40 transition-all duration-300">
-                  <div className="mb-4 sm:mb-6">
-                    <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-                      <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-purple-500" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-black bg-gradient-to-br from-purple-500 to-pink-400 bg-clip-text text-transparent mb-3">
+                <div className="space-y-4 sm:space-y-6">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent pb-2">
                     Lee donde quieras
-                  </h3>
-                  <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
-                    Lector optimizado para EPUB, PDF y MOBI en todos tus
-                    dispositivos
+                  </h2>
+                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
+                    Lector integrado y optimizado para EPUB, PDF y MOBI. Tus
+                    libros sincronizados en todos tus dispositivos.
                   </p>
                 </div>
+              </div>
 
-                {/* Feature 3 */}
-                <div className="group p-6 sm:p-8 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500/10 to-orange-500/10 border border-pink-500/20 backdrop-blur-sm hover:border-pink-500/40 transition-all duration-300">
-                  <div className="mb-4 sm:mb-6">
-                    <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-pink-500/20 to-orange-500/20 border border-pink-500/30">
-                      <Search className="w-6 h-6 sm:w-7 sm:h-7 text-pink-500" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-black bg-gradient-to-br from-pink-500 to-orange-400 bg-clip-text text-transparent mb-3">
+              {/* Feature 3 */}
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
+                <div className="space-y-4 sm:space-y-6">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent pb-2">
                     Encuentra al instante
-                  </h3>
-                  <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
-                    Búsqueda rápida y potente por título, autor o etiqueta
+                  </h2>
+                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
+                    Búsqueda rápida y potente. Encuentra cualquier libro por
+                    título, autor o etiqueta en segundos.
                   </p>
+                </div>
+                <div className="relative w-full aspect-square max-w-md mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-pink-500/20 shadow-xl bg-gradient-to-br from-pink-500/5 to-orange-500/5">
+                  <img
+                    src="/images/feature-search.jpg"
+                    alt="Encuentra libros al instante"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             </div>
