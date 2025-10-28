@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/context/AuthContext';
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-import { BookOpen, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { BookOpen, LogOut } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
@@ -12,17 +12,17 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   // No mostrar sidebar en páginas de login/register/reader
-  const isReaderPage = pathname?.startsWith('/reader/');
-  if (pathname === '/login' || pathname === '/register' || isReaderPage) {
+  const isReaderPage = pathname?.startsWith("/reader/");
+  if (pathname === "/login" || pathname === "/register" || isReaderPage) {
     return null;
   }
 
   const handleLogout = async () => {
     try {
       await logout();
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error("Error al cerrar sesión:", error);
     }
   };
 
@@ -31,7 +31,7 @@ export default function Sidebar() {
       <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 border-r border-border bg-sidebar/80 backdrop-blur-xl flex-col">
         {/* Logo/Header */}
         <div className="p-4 border-b border-border">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500 bg-clip-text text-transparent">
             Shelvd
           </h1>
         </div>
@@ -43,9 +43,9 @@ export default function Sidebar() {
               <Link
                 href="/"
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  pathname === '/'
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+                  pathname === "/"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
@@ -80,14 +80,10 @@ export default function Sidebar() {
           ) : (
             <div className="space-y-2">
               <Button asChild variant="ghost" className="w-full">
-                <Link href="/login">
-                  Iniciar Sesión
-                </Link>
+                <Link href="/login">Iniciar Sesión</Link>
               </Button>
               <Button asChild variant="default" className="w-full">
-                <Link href="/register">
-                  Registrarse
-                </Link>
+                <Link href="/register">Registrarse</Link>
               </Button>
             </div>
           )}
