@@ -576,7 +576,8 @@ export default function Home() {
                 </div>
 
                 <p className="text-base sm:text-lg lg:text-xl text-foreground/70 max-w-2xl mx-auto px-4">
-                  Lee, organiza y gestiona tu colección digital desde cualquier dispositivo
+                  Lee, organiza y gestiona tu colección digital desde cualquier
+                  dispositivo
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 lg:pt-8 w-full max-w-md sm:max-w-none px-4">
@@ -643,82 +644,55 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Features - Super Coloridos */}
+          {/* Features - Estilo Stats Cards */}
           <section className="relative py-12 sm:py-16 lg:py-20 px-4 sm:px-6">
-            <div className="container mx-auto max-w-6xl space-y-16 sm:space-y-24 lg:space-y-32">
-              {/* Feature 1 */}
-              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
-                <div className="space-y-4 sm:space-y-6">
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent pb-2">
+            <div className="container mx-auto max-w-5xl">
+              <div className="grid md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                {/* Feature 1 */}
+                <div className="group p-6 sm:p-8 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 backdrop-blur-sm hover:border-blue-500/40 transition-all duration-300">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
+                      <Folder className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black bg-gradient-to-br from-blue-500 to-cyan-400 bg-clip-text text-transparent mb-3">
                     Organiza tu colección
-                  </h2>
-                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
-                    Crea colecciones personalizadas, etiqueta tus libros y
-                    mantén todo perfectamente organizado. Tu biblioteca, a tu
-                    manera.
+                  </h3>
+                  <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
+                    Crea colecciones personalizadas y mantén todo perfectamente
+                    organizado
                   </p>
                 </div>
-                <div className="relative h-64 sm:h-72 lg:h-80 bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-400 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/50 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  <Folder className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 text-white/90 drop-shadow-lg" />
-                </div>
-              </div>
 
-              {/* Feature 2 */}
-              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
-                <div className="relative h-64 sm:h-72 lg:h-80 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-400 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/50 overflow-hidden lg:order-first">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  <BookOpen className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 text-white/90 drop-shadow-lg" />
-                </div>
-                <div className="space-y-4 sm:space-y-6">
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent pb-2">
+                {/* Feature 2 */}
+                <div className="group p-6 sm:p-8 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/40 transition-all duration-300">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+                      <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-purple-500" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black bg-gradient-to-br from-purple-500 to-pink-400 bg-clip-text text-transparent mb-3">
                     Lee donde quieras
-                  </h2>
-                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
-                    Lector integrado y optimizado para EPUB, PDF y MOBI. Tus
-                    libros sincronizados en todos tus dispositivos.
+                  </h3>
+                  <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
+                    Lector optimizado para EPUB, PDF y MOBI en todos tus
+                    dispositivos
                   </p>
                 </div>
-              </div>
 
-              {/* Feature 3 */}
-              <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
-                <div className="space-y-4 sm:space-y-6">
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent pb-2">
+                {/* Feature 3 */}
+                <div className="group p-6 sm:p-8 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500/10 to-orange-500/10 border border-pink-500/20 backdrop-blur-sm hover:border-pink-500/40 transition-all duration-300">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-pink-500/20 to-orange-500/20 border border-pink-500/30">
+                      <Search className="w-6 h-6 sm:w-7 sm:h-7 text-pink-500" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black bg-gradient-to-br from-pink-500 to-orange-400 bg-clip-text text-transparent mb-3">
                     Encuentra al instante
-                  </h2>
-                  <p className="text-base sm:text-lg text-foreground/70 leading-relaxed font-medium">
-                    Búsqueda rápida y potente. Encuentra cualquier libro por
-                    título, autor o etiqueta en segundos.
+                  </h3>
+                  <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
+                    Búsqueda rápida y potente por título, autor o etiqueta
                   </p>
-                </div>
-                <div className="relative h-64 sm:h-72 lg:h-80 bg-gradient-to-br from-pink-500 via-orange-500 to-amber-400 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl shadow-pink-500/50 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  <Search className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 text-white/90 drop-shadow-lg" />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* CTA Final - Colorido */}
-          <section className="relative py-16 sm:py-20 lg:py-32 px-4 sm:px-6">
-            <div className="container mx-auto max-w-4xl">
-              <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 sm:p-12 lg:p-16 text-center shadow-2xl shadow-purple-500/50 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-                <div className="relative space-y-4 sm:space-y-6">
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">
-                    Empieza hoy mismo
-                  </h2>
-                  <p className="text-base sm:text-lg lg:text-xl text-white/90 font-medium">
-                    Únete y organiza tu biblioteca digital en minutos
-                  </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="h-12 sm:h-14 lg:h-16 px-8 sm:px-10 lg:px-12 text-base sm:text-lg bg-white text-purple-600 hover:bg-white/90 shadow-xl font-bold"
-                  >
-                    <Link href="/register">Crear cuenta gratis</Link>
-                  </Button>
                 </div>
               </div>
             </div>
