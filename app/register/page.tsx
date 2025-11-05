@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import BackgroundBlobs from "@/components/BackgroundBlobs";
 import { Library } from "lucide-react";
 
 export default function RegisterPage() {
@@ -74,15 +75,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 relative">
+      <BackgroundBlobs />
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center">
           <Link href="/" className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-lg shadow-blue-500/30">
+            <div className="p-3 bg-gradient-to-br from-amber-600 to-yellow-600 rounded-2xl shadow-lg shadow-amber-500/30">
               <Library className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Shelvd</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">Shelvd</h1>
           </Link>
           <p className="text-muted-foreground text-center">
             Tu biblioteca digital personal

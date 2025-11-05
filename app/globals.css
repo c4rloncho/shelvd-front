@@ -102,15 +102,20 @@
   --color-slate-200: oklch(0.88 0.01 250);     /* Texto principal */
   --color-slate-50: oklch(0.98 0.005 250);     /* Texto brillante */
 
-  /* Azul brillante - Acento principal */
-  --color-blue-500: oklch(0.72 0.12 240);      /* Azul vibrante */
+  /* Dorado/Ámbar - Acento principal (luz cálida de lectura) */
+  --color-amber-500: oklch(0.75 0.15 65);      /* Dorado cálido */
+  --color-amber-600: oklch(0.65 0.14 60);      /* Dorado profundo */
+  --color-gold-400: oklch(0.78 0.12 75);       /* Oro suave */
 
   /* Colores de estado */
   --color-red-500: oklch(0.65 0.22 25);        /* Destructivo/Error */
   --color-cyan-500: oklch(0.68 0.15 180);      /* Info */
   --color-green-500: oklch(0.75 0.13 140);     /* Success */
-  --color-purple-500: oklch(0.70 0.18 280);    /* Acento alternativo */
   --color-orange-500: oklch(0.65 0.20 30);     /* Warning */
+
+  /* Crema/Beige - Texto cálido */
+  --color-cream-50: oklch(0.95 0.02 85);       /* Crema brillante */
+  --color-cream-100: oklch(0.90 0.03 85);      /* Crema suave */
 
   /* ============================================ */
   /* ASIGNACIÓN DE ROLES SEMÁNTICOS              */
@@ -152,24 +157,24 @@
   --input: var(--color-slate-600);
 
   /* Anillos de enfoque */
-  --ring: var(--color-blue-500);
+  --ring: var(--color-amber-500);
 
   /* Colores para gráficos */
-  --chart-1: var(--color-blue-500);
-  --chart-2: var(--color-cyan-500);
+  --chart-1: var(--color-amber-500);
+  --chart-2: var(--color-gold-400);
   --chart-3: var(--color-green-500);
-  --chart-4: var(--color-purple-500);
+  --chart-4: var(--color-cyan-500);
   --chart-5: var(--color-orange-500);
 
   /* Sidebar específico */
   --sidebar: var(--color-slate-900);
   --sidebar-foreground: var(--color-slate-200);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-slate-50);
+  --sidebar-primary: var(--color-amber-500);
+  --sidebar-primary-foreground: var(--color-slate-950);
   --sidebar-accent: var(--color-slate-800);
   --sidebar-accent-foreground: var(--color-slate-200);
   --sidebar-border: var(--color-slate-700);
-  --sidebar-ring: var(--color-blue-500);
+  --sidebar-ring: var(--color-amber-500);
 }
 
 @layer base {
@@ -255,6 +260,16 @@
 
   .animation-delay-4000 {
     animation-delay: 4s;
+  }
+
+  /* Shimmer animation for progress bar */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
   }
 
   /* Mesh Gradient Animation */

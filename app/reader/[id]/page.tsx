@@ -72,7 +72,7 @@ export default function ReaderPage() {
   const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
 
   // Configuración de lectura
-  const [fontSize, setFontSize] = useState(100);
+  const [fontSize, setFontSize] = useState(16);
   const [fontFamily, setFontFamily] = useState("serif");
   const [pageMode, setPageMode] = useState<"single" | "double">("single");
   const [lineHeight, setLineHeight] = useState(1.6);
@@ -209,7 +209,7 @@ export default function ReaderPage() {
 
     const colors = getThemeColors();
 
-    renditionRef.current.themes.fontSize(`${fontSize}%`);
+    renditionRef.current.themes.fontSize(`${fontSize}px`);
 
     // Configurar vista simple o doble
     renditionRef.current.spread(pageMode === "double" ? "auto" : "none");
@@ -873,14 +873,14 @@ export default function ReaderPage() {
                           Tamaño de fuente
                         </Label>
                         <span className="text-sm text-muted-foreground">
-                          {fontSize}%
+                          {fontSize}
                         </span>
                       </div>
                       <Slider
                         id="fontSize"
-                        min={75}
-                        max={200}
-                        step={5}
+                        min={10}
+                        max={36}
+                        step={1}
                         value={[fontSize]}
                         onValueChange={(value) => setFontSize(value[0])}
                         className="w-full"

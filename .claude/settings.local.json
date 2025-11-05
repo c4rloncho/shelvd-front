@@ -12,7 +12,8 @@
       "Bash(dir:*)",
       "Bash(mkdir:*)",
       "Bash(tree:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []
