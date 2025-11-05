@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CollectionsProvider } from "@/context/CollectionsContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import CacheCleaner from "@/components/CacheCleaner";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
             <LayoutWrapper>
               {children}
             </LayoutWrapper>
+            <Toaster />
           </CollectionsProvider>
         </AuthProvider>
       </body>

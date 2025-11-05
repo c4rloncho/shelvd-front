@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -19,6 +19,22 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 🔒 Seguridad: Limpiar credenciales de la URL si existen
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const hasCredentials = url.searchParams.has('password') ||
+                            url.searchParams.has('email') ||
+                            url.searchParams.has('username');
+
+      if (hasCredentials) {
+        // Limpiar la URL sin recargar la página
+        window.history.replaceState({}, document.title, '/register');
+        console.warn('⚠️ ADVERTENCIA DE SEGURIDAD: Se detectaron credenciales en la URL y fueron eliminadas automáticamente.');
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

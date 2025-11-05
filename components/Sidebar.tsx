@@ -28,7 +28,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 border-r border-border bg-sidebar/80 backdrop-blur-xl flex-col">
+      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 border-r border-border bg-sidebar/80 backdrop-blur-xl flex-col z-50">
         {/* Logo/Header */}
         <div className="p-4 border-b border-border">
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500 bg-clip-text text-transparent">

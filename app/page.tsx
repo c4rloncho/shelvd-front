@@ -1,7 +1,10 @@
 "use client";
 
 import BookCard from "@/components/BookCard";
+import BookLoadingAnimation from "@/components/BookLoadingAnimation";
+import BackgroundBlobs from "@/components/BackgroundBlobs";
 import CreateCollectionDialog from "@/components/CreateCollectionDialog";
+import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +35,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -57,6 +61,12 @@ export default function Home() {
   const [deletingCollectionId, setDeletingCollectionId] = useState<
     number | null
   >(null);
+
+  // 🗑️ Estados para confirmación de eliminación
+  const [deleteCollectionDialogOpen, setDeleteCollectionDialogOpen] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<number | null>(null);
+  const [deleteBookDialogOpen, setDeleteBookDialogOpen] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
 
   // 🔄 Cargar libros desde el backend
   const loadBooks = async () => {
@@ -109,20 +119,37 @@ export default function Home() {
   // 🗑️ Eliminar colección
   const handleDeleteCollection = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("¿Estás seguro de eliminar esta colección?")) return;
+    setCollectionToDelete(id);
+    setDeleteCollectionDialogOpen(true);
+  };
 
-    setDeletingCollectionId(id);
+  const confirmDeleteCollection = async () => {
+    if (!collectionToDelete) return;
+
+    setDeletingCollectionId(collectionToDelete);
     try {
-      await collectionsApi.delete(id);
+      await collectionsApi.delete(collectionToDelete);
       await loadCollections();
-      if (selectedCollectionId === id) {
+      if (selectedCollectionId === collectionToDelete) {
         setSelectedCollectionId(null);
       }
+      setDeleteCollectionDialogOpen(false); // Cerrar diálogo después de eliminar
+
+      // Mostrar toast de éxito
+      toast.success("Colección eliminada", {
+        description: "La colección ha sido eliminada exitosamente.",
+      });
     } catch (error) {
       console.error("Error al eliminar colección:", error);
       setError("Error al eliminar la colección");
+
+      // Mostrar toast de error
+      toast.error("Error al eliminar", {
+        description: "No se pudo eliminar la colección. Intenta nuevamente.",
+      });
     } finally {
       setDeletingCollectionId(null);
+      setCollectionToDelete(null);
     }
   };
 
@@ -135,27 +162,85 @@ export default function Home() {
 
     setUploadingFile(true);
     setError(null);
+
+    // Extraer nombre del archivo sin extensión
+    const fileName = file.name.replace(/\.[^/.]+$/, "");
+
+    // Toast de carga
+    const loadingToast = toast.loading("Subiendo libro...", {
+      description: `Procesando "${fileName}"`,
+    });
+
     try {
-      await booksApi.upload(file);
+      const uploadedBook = await booksApi.upload(file);
       await loadBooks();
       event.target.value = "";
+
+      // Usar el título del libro si existe, si no usar el nombre del archivo
+      const bookTitle = uploadedBook?.title || fileName;
+
+      // Cerrar toast de carga y mostrar éxito
+      toast.success("¡Libro agregado! 📚", {
+        id: loadingToast,
+        description: `"${bookTitle}" está listo para leer.`,
+        duration: 4000,
+      });
     } catch (error: any) {
       console.error("Error al subir libro:", error);
       setError(error.message || "Error al subir el libro");
+
+      // Cerrar toast de carga y mostrar error
+      toast.error("Error al subir libro", {
+        id: loadingToast,
+        description: error.message || "No se pudo subir el archivo. Intenta nuevamente.",
+        duration: 5000,
+      });
     } finally {
       setUploadingFile(false);
     }
   };
 
   const handleDeleteBook = async (id: number) => {
-    if (!confirm("¿Estás seguro de que quieres eliminar este libro?")) return;
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    setBookToDelete(book);
+    setDeleteBookDialogOpen(true);
+  };
+
+  const confirmDeleteBook = async () => {
+    if (!bookToDelete) return;
+
+    const bookTitle = bookToDelete.title;
 
     try {
-      await booksApi.delete(id);
+      await booksApi.delete(bookToDelete.id);
+
+      // Limpiar caché de IndexedDB
+      const { removeCachedBook } = await import('@/lib/bookCache');
+      await removeCachedBook(bookToDelete.id).catch(err => {
+        console.warn('Error al limpiar caché del libro:', err);
+      });
+
+      // Limpiar localStorage del libro eliminado
+      localStorage.removeItem(`book-${bookToDelete.id}-location`);
+
       await loadBooks();
+      setDeleteBookDialogOpen(false); // Cerrar diálogo después de eliminar
+
+      // Mostrar toast de éxito
+      toast.success("Libro eliminado", {
+        description: `"${bookTitle}" ha sido eliminado exitosamente.`,
+      });
     } catch (error: any) {
       console.error("Error al eliminar libro:", error);
       setError(error.message || "Error al eliminar el libro");
+
+      // Mostrar toast de error
+      toast.error("Error al eliminar", {
+        description: error.message || "No se pudo eliminar el libro. Intenta nuevamente.",
+      });
+    } finally {
+      setBookToDelete(null);
     }
   };
 
@@ -195,44 +280,47 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-64">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <p className="mt-4 text-sm text-muted-foreground">Cargando...</p>
-          </CardContent>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center bg-background relative">
+        <BackgroundBlobs />
+        <div className="flex flex-col items-center justify-center gap-6 relative z-10">
+          <BookLoadingAnimation />
+          <div className="text-center space-y-2">
+            <h2 className="text-xl font-semibold text-foreground">Cargando Shelvd</h2>
+            <p className="text-sm text-muted-foreground animate-pulse">
+              Preparando tu biblioteca...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <BackgroundBlobs />
       {/* Modal de carga para subida de archivos */}
       <Dialog open={uploadingFile}>
-        <DialogContent className="sm:max-w-md" showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle className="text-center">Subiendo libro</DialogTitle>
-            <DialogDescription className="text-center">
-              Por favor espera mientras procesamos tu archivo
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center justify-center py-6">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-12 w-12 rounded-full bg-primary/10"></div>
-              </div>
+        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl overflow-hidden" showCloseButton={false}>
+          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-lg mesh-gradient opacity-40"></div>
+          <div className="flex flex-col items-center justify-center py-8 px-6 relative z-10">
+            <BookLoadingAnimation />
+            <div className="text-center space-y-3 mt-8">
+              <h3 className="text-lg font-semibold text-foreground">
+                Subiendo libro
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Procesando tu archivo...
+              </p>
+              <p className="text-xs text-muted-foreground/70 animate-pulse">
+                Esto puede tomar unos momentos
+              </p>
             </div>
-            <p className="mt-6 text-sm text-muted-foreground font-medium">
-              Esto puede tomar unos momentos...
-            </p>
           </div>
         </DialogContent>
       </Dialog>
 
       {user ? (
-        <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 relative z-10">
           <div className="w-full max-w-7xl mx-auto">
             {/* Contenido principal */}
             <div className="w-full">
@@ -398,9 +486,15 @@ export default function Home() {
 
               {/* Grid de libros */}
               {booksLoading ? (
-                <CardContent className="py-12 sm:py-16">
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <CardContent className="py-16 sm:py-20">
+                  <div className="flex flex-col items-center justify-center gap-6">
+                    <BookLoadingAnimation />
+                    <div className="text-center space-y-2">
+                      <p className="text-base font-medium text-foreground">Cargando libros</p>
+                      <p className="text-sm text-muted-foreground animate-pulse">
+                        Buscando tus historias...
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               ) : books.length === 0 ? (
@@ -710,6 +804,23 @@ export default function Home() {
           </footer>
         </div>
       )}
+
+      {/* Diálogos de confirmación */}
+      <DeleteConfirmDialog
+        open={deleteCollectionDialogOpen}
+        onOpenChange={setDeleteCollectionDialogOpen}
+        onConfirm={confirmDeleteCollection}
+        title="¿Eliminar colección?"
+        description="¿Estás seguro de que quieres eliminar esta colección? Esta acción no se puede deshacer."
+      />
+
+      <DeleteConfirmDialog
+        open={deleteBookDialogOpen}
+        onOpenChange={setDeleteBookDialogOpen}
+        onConfirm={confirmDeleteBook}
+        title="¿Eliminar libro?"
+        description={bookToDelete ? `¿Estás seguro de que quieres eliminar "${bookToDelete.title}"? Esta acción no se puede deshacer.` : "¿Estás seguro de que quieres eliminar este libro? Esta acción no se puede deshacer."}
+      />
     </div>
   );
 }

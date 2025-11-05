@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Collection, collectionsApi, Book } from '@/lib/api';
 import { FolderPlus, Check, Folder } from 'lucide-react';
 import CreateCollectionDialog from './CreateCollectionDialog';
+import { toast } from 'sonner';
 
 interface AddToCollectionDialogProps {
   book: Book | null;
@@ -54,6 +55,9 @@ export default function AddToCollectionDialog({
     if (!book) return;
 
     setProcessingId(collectionId);
+    const collection = collections.find(c => c.id === collectionId);
+    const collectionName = collection?.name || 'la colección';
+
     try {
       const isInCollection = bookCollections.has(collectionId);
 
@@ -64,14 +68,30 @@ export default function AddToCollectionDialog({
           newSet.delete(collectionId);
           return newSet;
         });
+
+        // Toast al remover
+        toast.info("Libro removido", {
+          description: `"${book.title}" removido de "${collectionName}".`,
+        });
       } else {
         await collectionsApi.addBook(collectionId, book.id);
         setBookCollections(prev => new Set(prev).add(collectionId));
+
+        // Toast al agregar con emoji genial
+        toast.success("¡Libro agregado! ✨", {
+          description: `"${book.title}" agregado a "${collectionName}".`,
+          duration: 4000,
+        });
       }
 
       onSuccess?.();
     } catch (error) {
       console.error('Error al modificar colección:', error);
+
+      // Toast de error
+      toast.error("Error", {
+        description: "No se pudo modificar la colección. Intenta nuevamente.",
+      });
     } finally {
       setProcessingId(null);
     }

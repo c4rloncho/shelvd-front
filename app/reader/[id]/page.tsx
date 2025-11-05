@@ -30,7 +30,19 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import PDFViewer from "@/components/PDFViewer";
+import dynamic from "next/dynamic";
+import BookLoadingAnimation from "@/components/BookLoadingAnimation";
+import BackgroundBlobs from "@/components/BackgroundBlobs";
+
+// Importar PDFViewer solo en el cliente para evitar errores de SSR
+const PDFViewer = dynamic(() => import("@/components/PDFViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full">
+      <BookLoadingAnimation />
+    </div>
+  ),
+});
 
 interface TocItem {
   label: string;
@@ -121,6 +133,17 @@ export default function ReaderPage() {
       setIsViewerReady(true);
     }
   }, []);
+
+  // Redirigir automáticamente si el libro no existe
+  useEffect(() => {
+    if (error && error.includes('ya no existe')) {
+      const timer = setTimeout(() => {
+        router.push('/');
+      }, 3000); // Redirigir después de 3 segundos
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, router]);
 
   // Aplicar estilos cuando cambien
   useEffect(() => {
@@ -225,7 +248,16 @@ export default function ReaderPage() {
 
       try {
         setLoading(true);
-        const bookData = await booksApi.getById(bookId);
+        let bookData;
+        try {
+          bookData = await booksApi.getById(bookId);
+        } catch (apiError: any) {
+          // Si el libro no existe (fue eliminado), mostrar error específico
+          if (apiError.message.includes('404') || apiError.message.includes('no encontrado')) {
+            throw new Error('Este libro ya no existe. Es posible que haya sido eliminado.');
+          }
+          throw apiError;
+        }
         setBook(bookData);
 
         if (!bookData.bookUrl) {
@@ -587,6 +619,7 @@ export default function ReaderPage() {
   );
 
   if (error) {
+    const isBookDeleted = error.includes('ya no existe');
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full">
@@ -594,6 +627,11 @@ export default function ReaderPage() {
             <div className="text-center space-y-4">
               <h2 className="text-xl font-semibold text-destructive">Error</h2>
               <p className="text-muted-foreground">{error}</p>
+              {isBookDeleted && (
+                <p className="text-sm text-muted-foreground/70">
+                  Serás redirigido al inicio en 3 segundos...
+                </p>
+              )}
               <Button onClick={() => router.push("/")}>Volver al inicio</Button>
             </div>
           </CardContent>
@@ -607,14 +645,16 @@ export default function ReaderPage() {
       {/* Overlay de carga */}
       {loading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-background">
-          <Card className="w-64">
-            <CardContent className="flex flex-col items-center justify-center p-6">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              <p className="mt-4 text-sm text-muted-foreground">
-                Cargando libro...
+          <BackgroundBlobs />
+          <div className="flex flex-col items-center justify-center gap-6 relative z-10">
+            <BookLoadingAnimation />
+            <div className="text-center space-y-2">
+              <h2 className="text-lg font-semibold text-foreground">Abriendo libro</h2>
+              <p className="text-sm text-muted-foreground animate-pulse">
+                Preparando tu lectura...
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
 
@@ -644,12 +684,12 @@ export default function ReaderPage() {
 
           {/* Controles de navegación */}
           {!loading && (
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
               {/* Botón de capítulos - Solo para EPUB */}
               {fileType === "epub" && (
                 <Popover open={isTocOpen} onOpenChange={setIsTocOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 md:h-9 md:w-auto md:px-3">
                       <List className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
@@ -679,12 +719,12 @@ export default function ReaderPage() {
               {fileType === "epub" && (
                 <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 md:h-9 md:w-auto md:px-3">
                     <Settings className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-96 max-h-[600px] overflow-y-auto"
+                  className="w-[calc(100vw-2rem)] max-w-96 max-h-[600px] overflow-y-auto"
                   align="end"
                 >
                   <div className="space-y-4 pb-2">
@@ -861,7 +901,7 @@ export default function ReaderPage() {
                           className="flex-1 flex items-center justify-center gap-2"
                         >
                           <AlignLeft className="h-4 w-4" />
-                          <span>Izquierda</span>
+                          <span className="hidden sm:inline">Izquierda</span>
                         </Button>
                         <Button
                           variant={
@@ -872,7 +912,7 @@ export default function ReaderPage() {
                           className="flex-1 flex items-center justify-center gap-2"
                         >
                           <AlignCenter className="h-4 w-4" />
-                          <span>Centro</span>
+                          <span className="hidden sm:inline">Centro</span>
                         </Button>
                         <Button
                           variant={
@@ -883,7 +923,7 @@ export default function ReaderPage() {
                           className="flex-1 flex items-center justify-center gap-2"
                         >
                           <AlignJustify className="h-4 w-4" />
-                          <span>Justificado</span>
+                          <span className="hidden sm:inline">Justificado</span>
                         </Button>
                       </div>
                     </div>
@@ -894,7 +934,7 @@ export default function ReaderPage() {
 
               {/* Controles de navegación y progreso */}
               {totalPages > 0 && (
-                <div className="flex flex-col items-end">
+                <div className="hidden sm:flex flex-col items-end">
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {currentPage} / {totalPages}
                   </span>
@@ -905,11 +945,13 @@ export default function ReaderPage() {
               )}
               {fileType === "epub" && (
                 <>
-                  <Button variant="outline" size="sm" onClick={prevPage}>
-                    ← Anterior
+                  <Button variant="outline" size="sm" onClick={prevPage} className="h-8 w-8 p-0 md:h-9 md:w-auto md:px-3">
+                    <span className="hidden md:inline">← Anterior</span>
+                    <span className="md:hidden">←</span>
                   </Button>
-                  <Button variant="outline" size="sm" onClick={nextPage}>
-                    Siguiente →
+                  <Button variant="outline" size="sm" onClick={nextPage} className="h-8 w-8 p-0 md:h-9 md:w-auto md:px-3">
+                    <span className="hidden md:inline">Siguiente →</span>
+                    <span className="md:hidden">→</span>
                   </Button>
                 </>
               )}

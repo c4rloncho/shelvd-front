@@ -8,6 +8,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Folder, FolderPlus, Trash2, Library } from 'lucide-react';
 import { useCollections } from '@/context/CollectionsContext';
 import CreateCollectionDialog from './CreateCollectionDialog';
+import DeleteConfirmDialog from './DeleteConfirmDialog';
+import { toast } from 'sonner';
 
 interface CollectionsMobileSheetProps {
   open: boolean;
@@ -20,6 +22,8 @@ export default function CollectionsMobileSheet({ open, onOpenChange }: Collectio
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<number | null>(null);
 
   const loadCollections = async () => {
     setLoading(true);
@@ -41,19 +45,36 @@ export default function CollectionsMobileSheet({ open, onOpenChange }: Collectio
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('¿Estás seguro de eliminar esta colección?')) return;
+    setCollectionToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
-    setDeletingId(id);
+  const confirmDelete = async () => {
+    if (!collectionToDelete) return;
+
+    setDeletingId(collectionToDelete);
     try {
-      await collectionsApi.delete(id);
+      await collectionsApi.delete(collectionToDelete);
       await loadCollections();
-      if (selectedCollectionId === id) {
+      if (selectedCollectionId === collectionToDelete) {
         setSelectedCollectionId(null);
       }
+      setDeleteDialogOpen(false); // Cerrar diálogo después de eliminar
+
+      // Mostrar toast de éxito
+      toast.success("Colección eliminada", {
+        description: "La colección ha sido eliminada exitosamente.",
+      });
     } catch (error) {
       console.error('Error al eliminar colección:', error);
+
+      // Mostrar toast de error
+      toast.error("Error al eliminar", {
+        description: "No se pudo eliminar la colección. Intenta nuevamente.",
+      });
     } finally {
       setDeletingId(null);
+      setCollectionToDelete(null);
     }
   };
 
@@ -182,6 +203,14 @@ export default function CollectionsMobileSheet({ open, onOpenChange }: Collectio
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
         onSuccess={loadCollections}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="¿Eliminar colección?"
+        description="¿Estás seguro de que quieres eliminar esta colección? Esta acción no se puede deshacer."
       />
     </>
   );

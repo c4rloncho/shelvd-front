@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Library } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +17,23 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 🔒 Seguridad: Limpiar credenciales de la URL si existen
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const hasCredentials = url.searchParams.has('identifier') ||
+                            url.searchParams.has('password') ||
+                            url.searchParams.has('email') ||
+                            url.searchParams.has('user');
+
+      if (hasCredentials) {
+        // Limpiar la URL sin recargar la página
+        window.history.replaceState({}, document.title, '/login');
+        console.warn('⚠️ ADVERTENCIA DE SEGURIDAD: Se detectaron credenciales en la URL y fueron eliminadas automáticamente.');
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

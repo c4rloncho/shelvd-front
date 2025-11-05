@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { collectionsApi, CreateCollectionData } from '@/lib/api';
 import { FolderPlus } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CreateCollectionDialogProps {
   open: boolean;
@@ -30,13 +31,26 @@ export default function CreateCollectionDialog({
     setError('');
     setLoading(true);
 
+    const collectionName = formData.name;
+
     try {
       await collectionsApi.create(formData);
       setFormData({ name: '', description: '' });
       onOpenChange(false);
       onSuccess?.();
+
+      // Toast de éxito con emoji genial
+      toast.success("¡Colección creada! 🎉", {
+        description: `"${collectionName}" está lista para organizar tus libros.`,
+        duration: 4000,
+      });
     } catch (err: any) {
       setError(err.message || 'Error al crear la colección');
+
+      // Toast de error
+      toast.error("Error al crear colección", {
+        description: err.message || "No se pudo crear la colección. Intenta nuevamente.",
+      });
     } finally {
       setLoading(false);
     }

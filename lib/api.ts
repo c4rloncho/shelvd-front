@@ -16,13 +16,19 @@ class ApiClient {
 
   private async request<T = any>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeoutMs: number = 30000 // 30 segundos por defecto
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+
+    // Crear un AbortController para manejar el timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     const config: RequestInit = {
       ...options,
       credentials: "include", // Importante para enviar cookies
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
         ...options.headers,
@@ -31,6 +37,8 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({
@@ -43,7 +51,19 @@ class ApiClient {
 
       return await response.json();
     } catch (error) {
+      clearTimeout(timeoutId);
+
       if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error(
+            `La petición ha tardado demasiado tiempo. Por favor, verifica tu conexión a internet e intenta nuevamente.`
+          );
+        }
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          throw new Error(
+            'No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet y que el servidor esté funcionando.'
+          );
+        }
         throw error;
       }
       throw new Error("Error desconocido");
@@ -75,27 +95,54 @@ class ApiClient {
   // Método especial para FormData (upload de archivos)
   async postFormData<T = any>(
     endpoint: string,
-    formData: FormData
+    formData: FormData,
+    timeoutMs: number = 60000 // 60 segundos por defecto
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
-    const response = await fetch(url, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-      // No establecer Content-Type para FormData, el navegador lo hace automáticamente
-    });
+    // Crear un AbortController para manejar el timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({
-        message: "Error en la petición",
-      }));
-      throw new Error(
-        error.message || `HTTP error! status: ${response.status}`
-      );
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        signal: controller.signal,
+        // No establecer Content-Type para FormData, el navegador lo hace automáticamente
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({
+          message: "Error en la petición",
+        }));
+        throw new Error(
+          error.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error(
+            `La subida ha tardado demasiado tiempo (más de ${timeoutMs / 1000} segundos). Por favor, verifica tu conexión a internet o intenta con un archivo más pequeño.`
+          );
+        }
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          throw new Error(
+            'No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet y que el servidor esté funcionando.'
+          );
+        }
+      }
+
+      throw error;
     }
-
-    return await response.json();
   }
 }
 
@@ -242,7 +289,8 @@ export const booksApi = {
   upload: async (file: File): Promise<Book> => {
     const formData = new FormData();
     formData.append("file", file);
-    return api.postFormData("/books", formData);
+    // Timeout de 5 minutos para archivos grandes
+    return api.postFormData("/books", formData, 300000);
   },
 
   // 🗑️ Eliminar libro

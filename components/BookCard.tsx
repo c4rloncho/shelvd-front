@@ -186,7 +186,10 @@ export default function BookCard({ book, onDelete, onCollectionChange }: BookCar
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive cursor-pointer"
-                    onClick={() => onDelete(book.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(book.id);
+                    }}
                   >
                     Eliminar
                   </DropdownMenuItem>
