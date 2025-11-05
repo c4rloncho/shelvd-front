@@ -526,8 +526,8 @@ export default function Home() {
                   </div>
                 </CardContent>
               ) : (
-                <CardContent className="p-4 sm:p-8">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-5">
+                <CardContent className="p-4 sm:p-8 pb-8 sm:pb-12">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6">
                     {books.map((book) => (
                       <BookCard
                         key={book.id}

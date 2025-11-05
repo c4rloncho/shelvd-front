@@ -191,6 +191,7 @@ export interface Book {
   filePath: string;
   readingStatus: "unread" | "reading" | "completed";
   rating: number | null;
+  isFavorite: boolean;
   addedAt: string;
   updatedAt: string;
   bookUrl: string | null;
@@ -266,14 +267,16 @@ export const booksApi = {
     title?: string;
     page?: number;
     limit?: number;
+    readingStatus?: "unread" | "reading" | "completed";
   }) => {
     const query = new URLSearchParams();
 
     if (params?.title) query.append("title", params.title);
     if (params?.page) query.append("page", params.page.toString());
     if (params?.limit) query.append("limit", params.limit.toString());
+    if (params?.readingStatus) query.append("readingStatus", params.readingStatus);
 
-    // GET /books?title=algo&page=2&limit=8
+    // GET /books?title=algo&page=2&limit=8&readingStatus=reading
     const res = await api.get(`/books?${query.toString()}`);
 
     // El backend devuelve un objeto con { total, page, limit, totalPages, data }
@@ -296,6 +299,28 @@ export const booksApi = {
   // 🗑️ Eliminar libro
   delete: async (id: number): Promise<ApiResponse> => {
     return api.delete(`/books/${id}`);
+  },
+
+  // ⭐ Obtener libros favoritos
+  getFavorites: async (params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const query = new URLSearchParams();
+    if (params?.page) query.append("page", params.page.toString());
+    if (params?.limit) query.append("limit", params.limit.toString());
+
+    return api.get(`/books/favorites?${query.toString()}`);
+  },
+
+  // ⭐ Agregar a favoritos
+  addToFavorites: async (id: number): Promise<ApiResponse> => {
+    return api.post(`/books/${id}/favorite`);
+  },
+
+  // ⭐ Quitar de favoritos
+  removeFromFavorites: async (id: number): Promise<ApiResponse> => {
+    return api.delete(`/books/${id}/favorite`);
   },
 };
 export interface BookProgress {

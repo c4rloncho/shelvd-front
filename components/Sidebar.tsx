@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { BookOpen, LogOut } from "lucide-react";
+import { BookOpen, Clock, Heart, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -39,7 +39,7 @@ export default function Sidebar() {
         {/* Navigation Links */}
         <nav className="flex-1 p-3 overflow-y-auto">
           {user && (
-            <div className="space-y-4">
+            <div className="space-y-2">
               <Link
                 href="/"
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -50,6 +50,30 @@ export default function Sidebar() {
               >
                 <BookOpen className="w-4 h-4" />
                 Mi Biblioteca
+              </Link>
+
+              <Link
+                href="/favorites"
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  pathname === "/favorites"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                }`}
+              >
+                <Heart className="w-4 h-4" />
+                Favoritos
+              </Link>
+
+              <Link
+                href="/recent"
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  pathname === "/recent"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                Lecturas Recientes
               </Link>
             </div>
           )}

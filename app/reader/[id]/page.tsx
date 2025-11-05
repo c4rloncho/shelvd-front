@@ -382,23 +382,7 @@ export default function ReaderPage() {
           }
         }
 
-        // Manejar clicks para navegación
-        rendition.on("click", (event: MouseEvent) => {
-          // Obtener el ancho del contenedor
-          const rect = viewerRef.current?.getBoundingClientRect();
-          if (!rect) return;
-
-          const clickX = event.clientX;
-          const containerCenter = rect.left + rect.width / 2;
-
-          // Si el click es en la mitad izquierda, ir a página anterior
-          // Si es en la mitad derecha, ir a página siguiente
-          if (clickX < containerCenter) {
-            rendition.prev();
-          } else {
-            rendition.next();
-          }
-        });
+        // No agregar navegación por click aquí - se manejará en un useEffect separado
 
         // Manejar scroll del ratón dentro del libro
         let scrollTimeout: NodeJS.Timeout | null = null;
@@ -589,6 +573,154 @@ export default function ReaderPage() {
       alert("Error al navegar al capítulo.");
     }
   };
+
+  // Sistema de navegación por clicks y taps
+  useEffect(() => {
+    if (!renditionRef.current || !viewerRef.current || fileType !== "epub") {
+      return;
+    }
+
+    const rendition = renditionRef.current;
+    let pointerDownX = 0;
+    let pointerDownY = 0;
+    let pointerDownTime = 0;
+    let currentIframeBody: HTMLElement | null = null;
+    let isNavigating = false;
+    let navigationTimeout: NodeJS.Timeout | null = null;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      // Si ya estamos navegando, ignorar
+      if (isNavigating) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      pointerDownX = event.clientX;
+      pointerDownY = event.clientY;
+      pointerDownTime = Date.now();
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      // Si ya estamos navegando, ignorar completamente
+      if (isNavigating) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      // Calcular delta de movimiento y tiempo
+      const deltaX = Math.abs(event.clientX - pointerDownX);
+      const deltaY = Math.abs(event.clientY - pointerDownY);
+      const deltaTime = Date.now() - pointerDownTime;
+
+      // Si se movió mucho, es un drag/swipe, no un click/tap
+      if (deltaX > 20 || deltaY > 20) return;
+
+      // Si tomó demasiado tiempo, es un long press
+      if (deltaTime > 600) return;
+
+      // Obtener el elemento clickeado
+      const target = event.target as HTMLElement;
+
+      // No navegar si se clickeó en un elemento interactivo
+      if (target) {
+        const tagName = target.tagName.toLowerCase();
+        if (
+          tagName === "a" ||
+          tagName === "button" ||
+          tagName === "input" ||
+          tagName === "textarea" ||
+          tagName === "select" ||
+          target.closest("a")
+        ) {
+          return;
+        }
+      }
+
+      // Verificar si hay texto seleccionado en el iframe
+      const iframe = viewerRef.current?.querySelector("iframe");
+      if (iframe?.contentWindow) {
+        const iframeSelection = iframe.contentWindow.getSelection();
+        if (iframeSelection && iframeSelection.toString().length > 0) {
+          return;
+        }
+      }
+
+      // Calcular zonas de navegación basadas en el ancho del iframe
+      const iframeRect = iframe?.getBoundingClientRect();
+      if (!iframeRect) return;
+
+      const viewWidth = iframeRect.width;
+      const clickX = event.clientX - iframeRect.left;
+      const leftZone = viewWidth * 0.35;
+      const rightZone = viewWidth * 0.65;
+
+      // Activar flag de navegación para prevenir clicks múltiples
+      isNavigating = true;
+
+      // Navegar según la zona
+      try {
+        if (clickX < leftZone) {
+          rendition.prev();
+        } else if (clickX > rightZone) {
+          rendition.next();
+        } else {
+          // Si clickeó en zona muerta, no resetear el flag
+          isNavigating = false;
+          return;
+        }
+      } catch (error) {
+        console.error("Error en navegación:", error);
+        isNavigating = false;
+        return;
+      }
+
+      // Resetear el flag después de un delay más largo
+      if (navigationTimeout) clearTimeout(navigationTimeout);
+      navigationTimeout = setTimeout(() => {
+        isNavigating = false;
+      }, 500);
+    };
+
+    // Función para agregar listeners al iframe cuando esté listo
+    const setupIframeListeners = () => {
+      const iframe = viewerRef.current?.querySelector("iframe");
+      if (iframe?.contentDocument?.body) {
+        const iframeBody = iframe.contentDocument.body;
+
+        // Remover listeners anteriores si existen
+        if (currentIframeBody && currentIframeBody !== iframeBody) {
+          currentIframeBody.removeEventListener("pointerdown", handlePointerDown as any);
+          currentIframeBody.removeEventListener("pointerup", handlePointerUp as any);
+        }
+
+        // Solo agregar si no es el mismo body
+        if (currentIframeBody !== iframeBody) {
+          iframeBody.addEventListener("pointerdown", handlePointerDown as any, { capture: true });
+          iframeBody.addEventListener("pointerup", handlePointerUp as any, { capture: true });
+          currentIframeBody = iframeBody;
+        }
+      }
+    };
+
+    // Agregar listeners cuando el contenido se renderice
+    rendition.on("rendered", setupIframeListeners);
+
+    // Intentar agregar listeners inmediatamente si el iframe ya existe
+    setupIframeListeners();
+
+    return () => {
+      rendition.off("rendered", setupIframeListeners);
+      if (currentIframeBody) {
+        currentIframeBody.removeEventListener("pointerdown", handlePointerDown as any);
+        currentIframeBody.removeEventListener("pointerup", handlePointerUp as any);
+      }
+      if (navigationTimeout) {
+        clearTimeout(navigationTimeout);
+      }
+    };
+  }, [fileType, loading]);
 
   // Manejar teclas de flechas
   useEffect(() => {
