@@ -17,25 +17,38 @@ import { useCollections } from "@/context/CollectionsContext";
 import { Book, booksApi, Collection, collectionsApi } from "@/lib/api";
 import {
   AlertCircle,
-  ArrowRight,
   BookOpen,
   BookPlus,
   Folder,
   FolderPlus,
   Library,
   Search,
-  Sparkles,
   Trash2,
   Upload,
   X,
 } from "lucide-react";
+import {
+  ArrowRightIcon,
+  BookOpenIcon,
+  CloudArrowUpIcon,
+  FolderIcon,
+  MagnifyingGlassIcon,
+  RectangleStackIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/solid";
+import {
+  BookOpen as BookOpenPhosphor,
+  FilePdf,
+  BookBookmark,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, refreshUser } = useAuth();
   const { selectedCollectionId, setSelectedCollectionId } = useCollections();
   const router = useRouter();
 
@@ -157,12 +170,27 @@ export default function Home() {
     }
   };
 
+  // 📂 Verificar límite de libros
+  const hasReachedBookLimit = user?.maxBooks !== undefined &&
+    user?.bookCount !== undefined &&
+    user.bookCount >= user.maxBooks;
+
   // 📂 Subir archivo
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Verificar límite de libros
+    if (hasReachedBookLimit) {
+      toast.error("Límite de libros alcanzado", {
+        description: `Has alcanzado el límite de ${user?.maxBooks} libros. Elimina algunos libros para agregar más.`,
+        duration: 5000,
+      });
+      event.target.value = "";
+      return;
+    }
 
     setUploadingFile(true);
     setError(null);
@@ -178,6 +206,8 @@ export default function Home() {
     try {
       const uploadedBook = await booksApi.upload(file);
       await loadBooks();
+      // Refrescar datos del usuario para actualizar bookCount
+      await refreshUser();
       event.target.value = "";
 
       // Usar el título del libro si existe, si no usar el nombre del archivo
@@ -230,6 +260,8 @@ export default function Home() {
       localStorage.removeItem(`book-${bookToDelete.id}-location`);
 
       await loadBooks();
+      // Refrescar datos del usuario para actualizar bookCount
+      await refreshUser();
       setDeleteBookDialogOpen(false); // Cerrar diálogo después de eliminar
 
       // Mostrar toast de éxito
@@ -382,20 +414,46 @@ export default function Home() {
             <div className="w-full">
               {/* Header - Botones de acción y búsqueda */}
               <div className="mb-6">
+                {/* Badge de límite de libros */}
+                {user?.maxBooks !== undefined && user?.bookCount !== undefined && (
+                  <div className="mb-3 flex items-center gap-2">
+                    <Badge
+                      variant={hasReachedBookLimit ? "destructive" : "secondary"}
+                      className="text-xs px-2 py-1"
+                    >
+                      {user.bookCount} / {user.maxBooks} libros
+                    </Badge>
+                    {hasReachedBookLimit && (
+                      <span className="text-xs text-muted-foreground">
+                        Límite alcanzado. Elimina libros para agregar más.
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
                   {/* Botones de acción */}
                   <div className="flex gap-2 w-full sm:w-auto">
-                    <Button
-                      onClick={() =>
-                        document.getElementById("file-upload")?.click()
-                      }
-                      disabled={uploadingFile}
-                      size="lg"
-                      className="flex-1 sm:flex-none group"
-                    >
-                      <Upload className="w-4 h-4 transition-transform group-hover:scale-110" />
-                      {uploadingFile ? "Subiendo..." : "Agregar Libro"}
-                    </Button>
+                    <div className="flex-1 sm:flex-none">
+                      <Button
+                        onClick={() => {
+                          if (hasReachedBookLimit) {
+                            toast.error("Límite de libros alcanzado", {
+                              description: `Has alcanzado el límite de ${user?.maxBooks} libros. Elimina algunos libros para agregar más.`,
+                              duration: 5000,
+                            });
+                            return;
+                          }
+                          document.getElementById("file-upload")?.click();
+                        }}
+                        disabled={uploadingFile || hasReachedBookLimit}
+                        size="lg"
+                        className="flex-1 sm:flex-none group w-full"
+                        title={hasReachedBookLimit ? `Límite de ${user?.maxBooks} libros alcanzado` : "Agregar un nuevo libro"}
+                      >
+                        <Upload className="w-4 h-4 transition-transform group-hover:scale-110" />
+                        {uploadingFile ? "Subiendo..." : "Agregar Libro"}
+                      </Button>
+                    </div>
                     {selectedCollectionId !== null && (
                       <Button
                         onClick={() => {
@@ -427,7 +485,7 @@ export default function Home() {
                       type="file"
                       accept=".epub,.pdf,.mobi"
                       onChange={handleFileUpload}
-                      disabled={uploadingFile}
+                      disabled={uploadingFile || hasReachedBookLimit}
                       className="hidden"
                     />
                   </div>
@@ -720,15 +778,15 @@ export default function Home() {
           {/* Navbar */}
           <nav className="relative border-b border-white/10 bg-white/5 backdrop-blur-xl sticky top-0 z-50">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex h-16 items-center justify-between">
-                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
+              <div className="flex h-14 items-center justify-between">
+                <span className="text-lg sm:text-xl font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
                   Shelvd
                 </span>
-                <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Button
                     asChild
                     variant="ghost"
-                    size="default"
+                    size="sm"
                     className="hover:bg-white/10"
                   >
                     <Link href="/login">Acceder</Link>
@@ -739,13 +797,13 @@ export default function Home() {
           </nav>
 
           {/* Hero Section */}
-          <section className="relative pt-16 sm:pt-24 lg:pt-32 pb-12 sm:pb-16 lg:pb-20 px-4 sm:px-6">
+          <section className="relative pt-12 sm:pt-16 lg:pt-20 pb-8 sm:pb-12 lg:pb-16 px-4 sm:px-6">
             <div className="container relative mx-auto max-w-6xl">
-              <div className="text-center space-y-8 sm:space-y-10">
+              <div className="text-center space-y-5 sm:space-y-6">
                 {/* Badge de gratis */}
                 <div className="flex justify-center">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
+                    <SparklesIcon className="w-4 h-4 text-amber-400" />
                     <span className="text-sm font-semibold text-amber-300">
                       100% Gratis
                     </span>
@@ -753,23 +811,23 @@ export default function Home() {
                 </div>
 
                 {/* Nombre de la app */}
-                <div className="space-y-4 sm:space-y-6">
-                  <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight">
+                <div className="space-y-3 sm:space-y-4">
+                  <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight">
                     <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
                       Shelvd
                     </span>
                   </h1>
 
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground/90 px-4">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground/90 px-4">
                     Tu biblioteca digital personal
                   </h2>
                 </div>
 
-                <p className="text-lg sm:text-xl lg:text-2xl text-foreground/70 max-w-3xl mx-auto px-4 leading-relaxed">
+                <p className="text-base sm:text-lg lg:text-xl text-foreground/70 max-w-2xl mx-auto px-4 leading-relaxed">
                   Sube tus libros en{" "}
                   <span className="font-semibold text-amber-400">EPUB</span>,{" "}
-                  <span className="font-semibold text-yellow-300">PDF</span> y{" "}
-                  <span className="font-semibold text-amber-300">MOBI</span>.
+                  <span className="font-semibold text-red-400">PDF</span> y{" "}
+                  <span className="font-semibold text-orange-400">MOBI</span>.
                   Léelos desde cualquier dispositivo.{" "}
                   <span className="font-bold text-cream-50">
                     Sin límites. Sin anuncios.
@@ -777,158 +835,159 @@ export default function Home() {
                 </p>
 
                 {/* Badges de formatos */}
-                <div className="flex flex-wrap items-center justify-center gap-3 px-4">
-                  <div className="px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div className="flex flex-wrap items-center justify-center gap-2 px-4">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <BookOpenPhosphor size={18} weight="fill" className="text-amber-400" />
                     <span className="text-sm font-bold text-amber-300">
-                      📚 EPUB
+                      EPUB
                     </span>
                   </div>
-                  <div className="px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                    <span className="text-sm font-bold text-yellow-300">
-                      📄 PDF
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <FilePdf size={18} weight="fill" className="text-red-400" />
+                    <span className="text-sm font-bold text-red-300">
+                      PDF
                     </span>
                   </div>
-                  <div className="px-4 py-2 rounded-lg bg-amber-600/10 border border-amber-600/20">
-                    <span className="text-sm font-bold text-amber-400">
-                      📖 MOBI
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <BookBookmark size={18} weight="fill" className="text-orange-400" />
+                    <span className="text-sm font-bold text-orange-300">
+                      MOBI
                     </span>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 lg:pt-8 w-full max-w-md sm:max-w-none px-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 pt-2 sm:pt-4 w-full max-w-md sm:max-w-none px-4">
                   <Button
                     asChild
                     size="lg"
-                    className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg w-full sm:w-auto group"
+                    className="h-11 sm:h-12 px-6 sm:px-8 text-base w-full sm:w-auto group"
                   >
                     <Link href="/register">
                       Comenzar ahora
-                      <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRightIcon className="w-4 sm:w-5 h-4 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
                     size="lg"
-                    className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg border-2 hover:bg-accent w-full sm:w-auto"
+                    className="h-11 sm:h-12 px-6 sm:px-8 text-base border-2 hover:bg-accent w-full sm:w-auto"
                   >
                     <Link href="/login">Ya tengo cuenta</Link>
                   </Button>
                 </div>
-
-                {/* Trust indicators */}
               </div>
             </div>
           </section>
 
           {/* Features Grid */}
-          <section className="relative py-8 sm:py-12 lg:py-20 px-4 sm:px-6">
+          <section className="relative py-6 sm:py-8 lg:py-12 px-4 sm:px-6">
             <div className="container mx-auto max-w-6xl">
               {/* Section Header */}
-              <div className="text-center mb-12 sm:mb-16">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4">
+              <div className="text-center mb-8 sm:mb-10">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-2">
                   <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
                     Todo lo que necesitas
                   </span>
                 </h2>
-                <p className="text-lg sm:text-xl text-foreground/70 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-foreground/70 max-w-2xl mx-auto">
                   Una plataforma completa para gestionar tu biblioteca digital
                 </p>
               </div>
 
               {/* Features Grid */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {/* Feature 1 - Subir libros */}
-                <div className="group relative p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/10">
-                  <div className="mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Upload className="w-6 h-6 text-white" />
+                <div className="group relative p-5 sm:p-6 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/10">
+                  <div className="mb-3">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                      <CloudArrowUpIcon className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                  <h3 className="text-lg font-bold mb-1.5 text-foreground">
                     Sube tus libros
                   </h3>
-                  <p className="text-foreground/70 leading-relaxed">
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     Arrastra y suelta tus archivos EPUB, PDF o MOBI. Sin límites
                     de almacenamiento.
                   </p>
                 </div>
 
                 {/* Feature 2 - Lector integrado */}
-                <div className="group relative p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/10">
-                  <div className="mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-600 to-yellow-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <BookOpen className="w-6 h-6 text-white" />
+                <div className="group relative p-5 sm:p-6 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/10">
+                  <div className="mb-3">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                      <BookOpenIcon className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                  <h3 className="text-lg font-bold mb-1.5 text-foreground">
                     Lector optimizado
                   </h3>
-                  <p className="text-foreground/70 leading-relaxed">
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     Lee directamente en el navegador con nuestro lector rápido y
                     personalizable.
                   </p>
                 </div>
 
                 {/* Feature 3 - Colecciones */}
-                <div className="group relative p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/10">
-                  <div className="mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-600 to-orange-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Folder className="w-6 h-6 text-white" />
+                <div className="group relative p-5 sm:p-6 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/10">
+                  <div className="mb-3">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                      <FolderIcon className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                  <h3 className="text-lg font-bold mb-1.5 text-foreground">
                     Organiza en colecciones
                   </h3>
-                  <p className="text-foreground/70 leading-relaxed">
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     Crea colecciones personalizadas para organizar tu biblioteca
                     a tu manera.
                   </p>
                 </div>
 
                 {/* Feature 4 - Multiplataforma */}
-                <div className="group relative p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-500/10">
-                  <div className="mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Library className="w-6 h-6 text-white" />
+                <div className="group relative p-5 sm:p-6 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10">
+                  <div className="mb-3">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                      <RectangleStackIcon className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                  <h3 className="text-lg font-bold mb-1.5 text-foreground">
                     Acceso desde cualquier lugar
                   </h3>
-                  <p className="text-foreground/70 leading-relaxed">
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     Tu biblioteca sincronizada en todos tus dispositivos. PC,
                     tablet o móvil.
                   </p>
                 </div>
 
                 {/* Feature 5 - Búsqueda */}
-                <div className="group relative p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/10">
-                  <div className="mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-700 to-emerald-800 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Search className="w-6 h-6 text-white" />
+                <div className="group relative p-5 sm:p-6 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/10">
+                  <div className="mb-3">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                      <MagnifyingGlassIcon className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                  <h3 className="text-lg font-bold mb-1.5 text-foreground">
                     Búsqueda instantánea
                   </h3>
-                  <p className="text-foreground/70 leading-relaxed">
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     Encuentra cualquier libro por título o autor en segundos con
                     búsqueda en tiempo real.
                   </p>
                 </div>
 
                 {/* Feature 6 - Privacidad */}
-                <div className="group relative p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/10">
-                  <div className="mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Sparkles className="w-6 h-6 text-white" />
+                <div className="group relative p-5 sm:p-6 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10">
+                  <div className="mb-3">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                      <ShieldCheckIcon className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                  <h3 className="text-lg font-bold mb-1.5 text-foreground">
                     100% privado y seguro
                   </h3>
-                  <p className="text-foreground/70 leading-relaxed">
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     Tus libros son solo tuyos. Sin publicidad, sin rastreo, sin
                     vender tus datos.
                   </p>
@@ -938,32 +997,32 @@ export default function Home() {
           </section>
 
           {/* CTA Final */}
-          <section className="relative py-16 sm:py-20 lg:py-24 px-4 sm:px-6">
+          <section className="relative py-8 sm:py-12 lg:py-16 px-4 sm:px-6">
             <div className="container mx-auto max-w-4xl">
-              <div className="relative p-8 sm:p-12 lg:p-16 rounded-3xl bg-gradient-to-br from-amber-600/10 via-yellow-600/10 to-orange-600/10 border border-amber-500/20 backdrop-blur-sm overflow-hidden">
+              <div className="relative p-6 sm:p-8 lg:p-10 rounded-2xl bg-gradient-to-br from-amber-600/10 via-yellow-600/10 to-orange-600/10 border border-amber-500/20 backdrop-blur-sm overflow-hidden">
                 {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500/20 rounded-full blur-3xl"></div>
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-500/20 rounded-full blur-3xl"></div>
 
-                <div className="relative text-center space-y-6">
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black">
+                <div className="relative text-center space-y-4">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black">
                     <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
                       ¿Listo para empezar?
                     </span>
                   </h2>
-                  <p className="text-lg sm:text-xl text-foreground/70 max-w-2xl mx-auto">
+                  <p className="text-base sm:text-lg text-foreground/70 max-w-2xl mx-auto">
                     Únete a miles de lectores que ya disfrutan de su biblioteca
                     digital personal
                   </p>
-                  <div className="pt-4">
+                  <div className="pt-2">
                     <Button
                       asChild
                       size="lg"
-                      className="h-14 px-10 text-lg group"
+                      className="h-12 px-8 text-base group"
                     >
                       <Link href="/register">
                         Comenzar ahora
-                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Link>
                     </Button>
                   </div>
@@ -976,13 +1035,13 @@ export default function Home() {
           </section>
 
           {/* Footer */}
-          <footer className="relative border-t border-white/10 bg-white/5 backdrop-blur-xl py-8 sm:py-10 lg:py-12 px-4 sm:px-6">
+          <footer className="relative border-t border-white/10 bg-white/5 backdrop-blur-xl py-6 sm:py-8 px-4 sm:px-6">
             <div className="container mx-auto max-w-6xl">
-              <div className="flex flex-col items-center gap-4 sm:gap-5 lg:gap-6">
+              <div className="flex flex-col items-center gap-3 sm:gap-4">
                 {/* Logo y nombre */}
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-gradient-to-br from-amber-600 to-yellow-600 rounded-lg">
-                    <Library className="w-4 h-4 text-white" />
+                  <div className="p-1.5 bg-gradient-to-br from-amber-600 to-yellow-600 rounded-lg shadow-lg">
+                    <RectangleStackIcon className="w-4 h-4 text-white" />
                   </div>
                   <span className="font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
                     Shelvd
@@ -995,7 +1054,7 @@ export default function Home() {
                 </p>
 
                 {/* Enlaces legales */}
-                <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm">
+                <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
                   <Link
                     href="/terms"
                     className="text-muted-foreground hover:text-foreground transition-colors"

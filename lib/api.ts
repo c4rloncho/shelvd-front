@@ -165,6 +165,8 @@ export interface User {
   username: string;
   email: string;
   photo?: string;
+  maxBooks?: number;
+  bookCount?: number;
   createdAt: string;
   updatedAt: string;
 }
