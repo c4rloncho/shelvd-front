@@ -138,7 +138,7 @@ export default function ReaderPage() {
   useEffect(() => {
     if (error && error.includes('ya no existe')) {
       const timer = setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard');
       }, 3000); // Redirigir después de 3 segundos
 
       return () => clearTimeout(timer);
@@ -764,7 +764,7 @@ export default function ReaderPage() {
                   Serás redirigido al inicio en 3 segundos...
                 </p>
               )}
-              <Button onClick={() => router.push("/")}>Volver al inicio</Button>
+              <Button onClick={() => router.push("/dashboard")}>Volver al inicio</Button>
             </div>
           </CardContent>
         </Card>
@@ -797,7 +797,7 @@ export default function ReaderPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/dashboard")}
               className="flex-shrink-0"
             >
               ← Volver

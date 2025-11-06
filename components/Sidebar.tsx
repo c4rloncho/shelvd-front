@@ -28,7 +28,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 border-r border-border bg-sidebar/80 backdrop-blur-xl flex-col z-50">
+      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 border-r border-border bg-sidebar/50 backdrop-blur-xl flex-col z-50">
         {/* Logo/Header */}
         <div className="p-4 border-b border-border">
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500 bg-clip-text text-transparent">
@@ -41,9 +41,9 @@ export default function Sidebar() {
           {user && (
             <div className="space-y-2">
               <Link
-                href="/"
+                href="/dashboard"
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  pathname === "/"
+                  pathname === "/dashboard"
                     ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 }`}

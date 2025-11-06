@@ -39,9 +39,9 @@ export default function BottomNav() {
         <div className="flex items-center justify-around px-2 py-3 safe-area-inset-bottom">
           {/* Home/Biblioteca */}
           <Link
-            href="/"
+            href="/dashboard"
             className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
-              pathname === '/'
+              pathname === '/dashboard'
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
             }`}

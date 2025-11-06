@@ -59,7 +59,7 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
       });
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al registrarse");
     } finally {

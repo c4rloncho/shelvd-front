@@ -72,11 +72,11 @@ export default function BookCard({
     if (!rating) return null;
 
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {[...Array(5)].map((_, i) => (
           <svg
             key={i}
-            className={`w-4 h-4 ${
+            className={`w-3.5 h-3.5 ${
               i < rating ? "text-yellow-400" : "text-muted-foreground/30"
             }`}
             fill="currentColor"
@@ -214,12 +214,12 @@ export default function BookCard({
       {/* Contenedor interno */}
       <div>
         {/* Imagen de portada con overlays */}
-        <div className="aspect-[2/3.5] relative bg-muted overflow-hidden">
+        <div className="aspect-[2/3.2] relative bg-muted overflow-hidden">
           {/* Botón de favorito */}
           <button
             onClick={handleToggleFavorite}
             disabled={isFavoriteLoading}
-            className={`absolute top-2 right-2 z-20 p-1.5 rounded-full backdrop-blur-md transition-all duration-200 ${
+            className={`absolute top-1.5 right-1.5 z-20 p-1 rounded-full backdrop-blur-md transition-all duration-200 ${
               isFavorite
                 ? "bg-pink-500/90 hover:bg-pink-600/90"
                 : "bg-black/40 hover:bg-black/60"
@@ -230,7 +230,7 @@ export default function BookCard({
             }`}
           >
             <Heart
-              className={`w-4 h-4 transition-all ${
+              className={`w-3.5 h-3.5 transition-all ${
                 isFavorite ? "fill-white text-white" : "text-white"
               }`}
             />
@@ -263,8 +263,8 @@ export default function BookCard({
                     {/* Sombra adicional más suave para mejor transición */}
                     <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
-                    <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10">
-                      <div className="flex items-center justify-between mb-1.5 px-1">
+                    <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
+                      <div className="flex items-center justify-between mb-1 px-1">
                         <span className="text-xs text-white font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                           Progreso
                         </span>
@@ -304,10 +304,10 @@ export default function BookCard({
         </div>
 
         {/* Información del libro - Optimizada */}
-        <div className="p-2.5">
+        <div className="p-2">
           {/* Título y menú de tres puntos */}
-          <div className="flex items-start gap-1.5 mb-1">
-            <h3 className="font-semibold text-card-foreground text-sm line-clamp-2 flex-1 leading-tight">
+          <div className="flex items-start gap-1.5 mb-0.5">
+            <h3 className="font-semibold text-card-foreground text-[13px] line-clamp-2 flex-1 leading-tight">
               {book.title}
             </h3>
             {/* Menú de tres puntos */}
@@ -388,13 +388,13 @@ export default function BookCard({
           </div>
 
           {book.author && (
-            <p className="text-xs text-muted-foreground mb-1.5 line-clamp-1">
+            <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
               {book.author}
             </p>
           )}
 
           {book.rating && (
-            <div className="mb-1.5">{getRatingStars(book.rating)}</div>
+            <div className="mb-1">{getRatingStars(book.rating)}</div>
           )}
 
           {/* Metadatos y badge de estado */}
