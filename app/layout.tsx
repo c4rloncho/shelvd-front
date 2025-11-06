@@ -22,6 +22,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Shelvd",
   description: "Book management app",
+  verification: {
+    google: "BPfpKKlrCD2l45cX4fuW56UTH6ALMC2grD8v2u7ebhI",
+  },
 };
 
 export default function RootLayout({
