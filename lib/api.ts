@@ -322,6 +322,11 @@ export const booksApi = {
   removeFromFavorites: async (id: number): Promise<ApiResponse> => {
     return api.delete(`/books/${id}/favorite`);
   },
+
+  // ✅ Marcar como completado
+  markAsCompleted: async (id: number): Promise<ApiResponse> => {
+    return api.post(`/books/complete/${id}`);
+  },
 };
 export interface BookProgress {
   currentPage: number;

@@ -5,11 +5,13 @@ import BookCard from "@/components/BookCard";
 import BookLoadingAnimation from "@/components/BookLoadingAnimation";
 import CreateCollectionDialog from "@/components/CreateCollectionDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
+import AddBooksToCollectionDialog from "@/components/AddBooksToCollectionDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { useCollections } from "@/context/CollectionsContext";
 import { Book, booksApi, Collection, collectionsApi } from "@/lib/api";
@@ -17,6 +19,7 @@ import {
   AlertCircle,
   ArrowRight,
   BookOpen,
+  BookPlus,
   Folder,
   FolderPlus,
   Library,
@@ -64,6 +67,10 @@ export default function Home() {
   );
   const [deleteBookDialogOpen, setDeleteBookDialogOpen] = useState(false);
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
+
+  // 📚 Estados para agregar libros a colección
+  const [addBooksDialogOpen, setAddBooksDialogOpen] = useState(false);
+  const [currentCollection, setCurrentCollection] = useState<Collection | null>(null);
 
   // 🔄 Cargar libros desde el backend
   const loadBooks = async () => {
@@ -389,6 +396,22 @@ export default function Home() {
                       <Upload className="w-4 h-4 transition-transform group-hover:scale-110" />
                       {uploadingFile ? "Subiendo..." : "Agregar Libro"}
                     </Button>
+                    {selectedCollectionId !== null && (
+                      <Button
+                        onClick={() => {
+                          const collection = collections.find(c => c.id === selectedCollectionId);
+                          setCurrentCollection(collection || null);
+                          setAddBooksDialogOpen(true);
+                        }}
+                        variant="secondary"
+                        size="lg"
+                        className="flex-1 sm:flex-none group"
+                      >
+                        <BookPlus className="w-4 h-4 transition-transform group-hover:scale-110" />
+                        <span className="hidden sm:inline">Agregar de Biblioteca</span>
+                        <span className="sm:hidden">De Biblioteca</span>
+                      </Button>
+                    )}
                     <Button
                       onClick={() => setCreateDialogOpen(true)}
                       variant="outline"
@@ -453,64 +476,64 @@ export default function Home() {
 
               {/* Sección de Colecciones */}
               <div className="mb-6">
-                <div className="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-hide border-b border-border/50">
-                  {/* Todos los libros */}
-                  <button
-                    onClick={() => setSelectedCollectionId(null)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 ${
-                      selectedCollectionId === null
-                        ? "text-foreground border-primary bg-accent/50"
-                        : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/30"
-                    }`}
-                  >
-                    <Library className="w-4 h-4" />
-                    Todos los libros
-                  </button>
+                <Tabs
+                  value={selectedCollectionId?.toString() || "all"}
+                  onValueChange={(value) =>
+                    setSelectedCollectionId(value === "all" ? null : parseInt(value))
+                  }
+                >
+                  <div className="overflow-x-auto scrollbar-hide">
+                    <TabsList className="w-fit">
+                      {/* Todos los libros */}
+                      <TabsTrigger value="all" className="gap-2">
+                        <Library className="w-4 h-4" />
+                        Todos los libros
+                      </TabsTrigger>
 
-                  {/* Lista de colecciones */}
-                  {collectionsLoading ? (
-                    <div className="text-xs text-muted-foreground px-4 py-2">
-                      Cargando colecciones...
-                    </div>
-                  ) : (
-                    collections.map((collection) => (
-                      <div
-                        key={collection.id}
-                        className={`group flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 ${
-                          selectedCollectionId === collection.id
-                            ? "text-foreground border-primary bg-accent/50"
-                            : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/30"
-                        }`}
-                      >
-                        <div
-                          onClick={() => setSelectedCollectionId(collection.id)}
-                          className="flex items-center gap-2 flex-1 cursor-pointer"
-                        >
-                          <Folder className="w-4 h-4" />
-                          <span>{collection.name}</span>
-                          {collection.bookCount !== undefined && (
-                            <Badge
-                              variant="secondary"
-                              className="text-xs px-1.5 py-0.5 ml-1"
-                            >
-                              {collection.bookCount}
-                            </Badge>
-                          )}
+                      {/* Lista de colecciones */}
+                      {collectionsLoading ? (
+                        <div className="text-xs text-muted-foreground px-4 py-2">
+                          Cargando...
                         </div>
-                        <button
-                          onClick={(e) =>
-                            handleDeleteCollection(collection.id, e)
-                          }
-                          disabled={deletingCollectionId === collection.id}
-                          className="ml-1 opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity p-1 rounded hover:bg-destructive/10"
-                          aria-label="Eliminar colección"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ) : (
+                        collections.map((collection) => (
+                          <TabsTrigger
+                            key={collection.id}
+                            value={collection.id.toString()}
+                            className="gap-2 group relative"
+                            title={collection.name}
+                          >
+                            <Folder className="w-4 h-4 shrink-0" />
+                            <span className="truncate">{collection.name}</span>
+                            {collection.bookCount !== undefined && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs px-1.5 py-0.5 shrink-0"
+                              >
+                                {collection.bookCount}
+                              </Badge>
+                            )}
+                            <span
+                              role="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDeleteCollection(collection.id, e);
+                              }}
+                              className={`ml-1 opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity p-0.5 rounded hover:bg-destructive/10 shrink-0 cursor-pointer ${
+                                deletingCollectionId === collection.id ? "pointer-events-none opacity-50" : ""
+                              }`}
+                              aria-label="Eliminar colección"
+                              tabIndex={-1}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </span>
+                          </TabsTrigger>
+                        ))
+                      )}
+                    </TabsList>
+                  </div>
+                </Tabs>
               </div>
             </div>
 
@@ -552,27 +575,50 @@ export default function Home() {
                 <CardContent className="py-16 sm:py-24 px-4">
                   <div className="text-center flex flex-col items-center">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                      <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
+                      {selectedCollectionId !== null ? (
+                        <Folder className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
+                      ) : (
+                        <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
+                      )}
                     </div>
                     <h3 className="text-base sm:text-xl font-semibold text-foreground mb-2">
-                      Tu biblioteca está vacía
+                      {selectedCollectionId !== null
+                        ? "Esta colección está vacía"
+                        : "Tu biblioteca está vacía"}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6 max-w-sm">
                       {searchTitle
                         ? `No se encontraron libros que coincidan con "${searchTitle}"`
+                        : selectedCollectionId !== null
+                        ? "Agrega libros de tu biblioteca a esta colección"
                         : "Comienza agregando tu primer libro usando el botón de arriba"}
                     </p>
                     {!searchTitle && (
-                      <Button
-                        onClick={() =>
-                          document.getElementById("file-upload")?.click()
-                        }
-                        size="lg"
-                        className="group"
-                      >
-                        <Upload className="w-4 h-4 transition-transform group-hover:scale-110" />
-                        Agregar Primer Libro
-                      </Button>
+                      selectedCollectionId !== null ? (
+                        <Button
+                          onClick={() => {
+                            const collection = collections.find(c => c.id === selectedCollectionId);
+                            setCurrentCollection(collection || null);
+                            setAddBooksDialogOpen(true);
+                          }}
+                          size="lg"
+                          className="group"
+                        >
+                          <BookPlus className="w-4 h-4 transition-transform group-hover:scale-110" />
+                          Agregar de Biblioteca
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() =>
+                            document.getElementById("file-upload")?.click()
+                          }
+                          size="lg"
+                          className="group"
+                        >
+                          <Upload className="w-4 h-4 transition-transform group-hover:scale-110" />
+                          Agregar Primer Libro
+                        </Button>
+                      )
                     )}
                   </div>
                 </CardContent>
@@ -585,6 +631,7 @@ export default function Home() {
                         book={book}
                         onDelete={handleDeleteBook}
                         onCollectionChange={loadBooks}
+                        collectionId={selectedCollectionId}
                       />
                     ))}
                   </div>
@@ -993,6 +1040,17 @@ export default function Home() {
             ? `¿Estás seguro de que quieres eliminar "${bookToDelete.title}"? Esta acción no se puede deshacer.`
             : "¿Estás seguro de que quieres eliminar este libro? Esta acción no se puede deshacer."
         }
+      />
+
+      {/* Diálogo para agregar libros a colección */}
+      <AddBooksToCollectionDialog
+        collection={currentCollection}
+        open={addBooksDialogOpen}
+        onOpenChange={setAddBooksDialogOpen}
+        onSuccess={() => {
+          loadBooks();
+          loadCollections();
+        }}
       />
     </div>
   );

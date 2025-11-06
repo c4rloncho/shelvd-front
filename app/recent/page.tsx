@@ -45,7 +45,13 @@ export default function RecentPage() {
         page,
         limit,
       });
-      setBooks(response.data);
+
+      // Filtrar para mostrar solo los libros que coincidan exactamente con el filtro
+      const filteredBooks = response.data.filter((book: Book) => {
+        return book.readingStatus === filter;
+      });
+
+      setBooks(filteredBooks);
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error al cargar libros recientes:", error);
