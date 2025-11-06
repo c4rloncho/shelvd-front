@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: "Shelvd",
   description: "Book management app",
   verification: {
-    google: "BPfpKKlrCD2l45cX4fuW56UTH6ALMC2grD8v2u7ebhI",
+    google: "XMBZTnYhMM2GysMdjjVZZ6okf0d0gH4HtvV5DHbQY9E",
   },
 };
 
