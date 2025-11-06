@@ -1,11 +1,11 @@
 "use client";
 
+import AddBooksToCollectionDialog from "@/components/AddBooksToCollectionDialog";
 import BackgroundBlobs from "@/components/BackgroundBlobs";
 import BookCard from "@/components/BookCard";
 import BookLoadingAnimation from "@/components/BookLoadingAnimation";
 import CreateCollectionDialog from "@/components/CreateCollectionDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
-import AddBooksToCollectionDialog from "@/components/AddBooksToCollectionDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +15,21 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { useCollections } from "@/context/CollectionsContext";
 import { Book, booksApi, Collection, collectionsApi } from "@/lib/api";
+import {
+  ArrowRightIcon,
+  BookOpenIcon,
+  CloudArrowUpIcon,
+  FolderIcon,
+  MagnifyingGlassIcon,
+  RectangleStackIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/solid";
+import {
+  BookBookmark,
+  BookOpen as BookOpenPhosphor,
+  FilePdf,
+} from "@phosphor-icons/react";
 import {
   AlertCircle,
   BookOpen,
@@ -27,21 +42,6 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import {
-  ArrowRightIcon,
-  BookOpenIcon,
-  CloudArrowUpIcon,
-  FolderIcon,
-  MagnifyingGlassIcon,
-  RectangleStackIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/solid";
-import {
-  BookOpen as BookOpenPhosphor,
-  FilePdf,
-  BookBookmark,
-} from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -61,7 +61,7 @@ export default function Home() {
   const [searchTitle, setSearchTitle] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [page, setPage] = useState(1);
-  const [limit] = useState(8);
+  const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
   // 📁 Estados para colecciones
@@ -83,7 +83,9 @@ export default function Home() {
 
   // 📚 Estados para agregar libros a colección
   const [addBooksDialogOpen, setAddBooksDialogOpen] = useState(false);
-  const [currentCollection, setCurrentCollection] = useState<Collection | null>(null);
+  const [currentCollection, setCurrentCollection] = useState<Collection | null>(
+    null
+  );
 
   // 🔄 Cargar libros desde el backend
   const loadBooks = async () => {
@@ -171,7 +173,8 @@ export default function Home() {
   };
 
   // 📂 Verificar límite de libros
-  const hasReachedBookLimit = user?.maxBooks !== undefined &&
+  const hasReachedBookLimit =
+    user?.maxBooks !== undefined &&
     user?.bookCount !== undefined &&
     user.bookCount >= user.maxBooks;
 
@@ -391,7 +394,8 @@ export default function Home() {
                     Procesando tu archivo
                   </p>
                   <p className="text-xs text-muted-foreground/70 max-w-xs mx-auto">
-                    Estamos preparando tu libro para que lo disfrutes en unos momentos
+                    Estamos preparando tu libro para que lo disfrutes en unos
+                    momentos
                   </p>
                 </div>
 
@@ -415,21 +419,24 @@ export default function Home() {
               {/* Header - Botones de acción y búsqueda */}
               <div className="mb-6">
                 {/* Badge de límite de libros */}
-                {user?.maxBooks !== undefined && user?.bookCount !== undefined && (
-                  <div className="mb-3 flex items-center gap-2">
-                    <Badge
-                      variant={hasReachedBookLimit ? "destructive" : "secondary"}
-                      className="text-xs px-2 py-1"
-                    >
-                      {user.bookCount} / {user.maxBooks} libros
-                    </Badge>
-                    {hasReachedBookLimit && (
-                      <span className="text-xs text-muted-foreground">
-                        Límite alcanzado. Elimina libros para agregar más.
-                      </span>
-                    )}
-                  </div>
-                )}
+                {user?.maxBooks !== undefined &&
+                  user?.bookCount !== undefined && (
+                    <div className="mb-3 flex items-center gap-2">
+                      <Badge
+                        variant={
+                          hasReachedBookLimit ? "destructive" : "secondary"
+                        }
+                        className="text-xs px-2 py-1"
+                      >
+                        {user.bookCount} / {user.maxBooks} libros
+                      </Badge>
+                      {hasReachedBookLimit && (
+                        <span className="text-xs text-muted-foreground">
+                          Límite alcanzado. Elimina libros para agregar más.
+                        </span>
+                      )}
+                    </div>
+                  )}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
                   {/* Botones de acción */}
                   <div className="flex gap-2 w-full sm:w-auto">
@@ -448,7 +455,11 @@ export default function Home() {
                         disabled={uploadingFile || hasReachedBookLimit}
                         size="lg"
                         className="flex-1 sm:flex-none group w-full"
-                        title={hasReachedBookLimit ? `Límite de ${user?.maxBooks} libros alcanzado` : "Agregar un nuevo libro"}
+                        title={
+                          hasReachedBookLimit
+                            ? `Límite de ${user?.maxBooks} libros alcanzado`
+                            : "Agregar un nuevo libro"
+                        }
                       >
                         <Upload className="w-4 h-4 transition-transform group-hover:scale-110" />
                         {uploadingFile ? "Subiendo..." : "Agregar Libro"}
@@ -457,7 +468,9 @@ export default function Home() {
                     {selectedCollectionId !== null && (
                       <Button
                         onClick={() => {
-                          const collection = collections.find(c => c.id === selectedCollectionId);
+                          const collection = collections.find(
+                            (c) => c.id === selectedCollectionId
+                          );
                           setCurrentCollection(collection || null);
                           setAddBooksDialogOpen(true);
                         }}
@@ -466,7 +479,9 @@ export default function Home() {
                         className="flex-1 sm:flex-none group"
                       >
                         <BookPlus className="w-4 h-4 transition-transform group-hover:scale-110" />
-                        <span className="hidden sm:inline">Agregar de Biblioteca</span>
+                        <span className="hidden sm:inline">
+                          Agregar de Biblioteca
+                        </span>
                         <span className="sm:hidden">De Biblioteca</span>
                       </Button>
                     )}
@@ -537,7 +552,9 @@ export default function Home() {
                 <Tabs
                   value={selectedCollectionId?.toString() || "all"}
                   onValueChange={(value) =>
-                    setSelectedCollectionId(value === "all" ? null : parseInt(value))
+                    setSelectedCollectionId(
+                      value === "all" ? null : parseInt(value)
+                    )
                   }
                 >
                   <div className="overflow-x-auto scrollbar-hide">
@@ -579,7 +596,9 @@ export default function Home() {
                                 handleDeleteCollection(collection.id, e);
                               }}
                               className={`ml-1 opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity p-0.5 rounded hover:bg-destructive/10 shrink-0 cursor-pointer ${
-                                deletingCollectionId === collection.id ? "pointer-events-none opacity-50" : ""
+                                deletingCollectionId === collection.id
+                                  ? "pointer-events-none opacity-50"
+                                  : ""
                               }`}
                               aria-label="Eliminar colección"
                               tabIndex={-1}
@@ -651,11 +670,13 @@ export default function Home() {
                         ? "Agrega libros de tu biblioteca a esta colección"
                         : "Comienza agregando tu primer libro usando el botón de arriba"}
                     </p>
-                    {!searchTitle && (
-                      selectedCollectionId !== null ? (
+                    {!searchTitle &&
+                      (selectedCollectionId !== null ? (
                         <Button
                           onClick={() => {
-                            const collection = collections.find(c => c.id === selectedCollectionId);
+                            const collection = collections.find(
+                              (c) => c.id === selectedCollectionId
+                            );
                             setCurrentCollection(collection || null);
                             setAddBooksDialogOpen(true);
                           }}
@@ -676,8 +697,7 @@ export default function Home() {
                           <Upload className="w-4 h-4 transition-transform group-hover:scale-110" />
                           Agregar Primer Libro
                         </Button>
-                      )
-                    )}
+                      ))}
                   </div>
                 </CardContent>
               ) : (
@@ -837,19 +857,25 @@ export default function Home() {
                 {/* Badges de formatos */}
                 <div className="flex flex-wrap items-center justify-center gap-2 px-4">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <BookOpenPhosphor size={18} weight="fill" className="text-amber-400" />
+                    <BookOpenPhosphor
+                      size={18}
+                      weight="fill"
+                      className="text-amber-400"
+                    />
                     <span className="text-sm font-bold text-amber-300">
                       EPUB
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
                     <FilePdf size={18} weight="fill" className="text-red-400" />
-                    <span className="text-sm font-bold text-red-300">
-                      PDF
-                    </span>
+                    <span className="text-sm font-bold text-red-300">PDF</span>
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                    <BookBookmark size={18} weight="fill" className="text-orange-400" />
+                    <BookBookmark
+                      size={18}
+                      weight="fill"
+                      className="text-orange-400"
+                    />
                     <span className="text-sm font-bold text-orange-300">
                       MOBI
                     </span>
